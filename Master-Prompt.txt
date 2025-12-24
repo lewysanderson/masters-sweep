@@ -1,0 +1,87 @@
+# Master Prompt: Golf Sweepstake Application ("The April Major")
+
+**Role:** You are a Senior Full Stack Developer and UI/UX Designer.
+**Objective:** Build a robust, responsive web application for a "Masters Golf Sweepstake" using **Next.js 14+ (App Router)**, **Supabase**, and **Tailwind CSS**.
+
+---
+
+## 1. Project Overview
+This is a social sweepstake app where users join a "Game," pay an entry fee (handled manually), and select a team of 7 golfers.
+* **Winning Logic:** The user's score is the aggregate score of the **best 4** golfers in their team of 7. Lowest score wins.
+* **Selection Rules:** Users must pick strictly:
+    * 2 Golfers from the Top 10 rankings.
+    * 3 Golfers from Ranks 11–50.
+    * 2 Golfers from the Field (51+).
+* **Payment Logic:** Users mark themselves as "Paid" (Pending). The Admin manually verifies and marks them as "Verified".
+
+## 2. Tech Stack
+* **Frontend:** Next.js 14+ (App Router, Server Components, Server Actions).
+* **Language:** TypeScript.
+* **Styling:** Tailwind CSS (Theme: Masters Green `#005f40`, Stone `#f5f5f4`, White).
+* **Backend/Auth:** Supabase (PostgreSQL + Auth).
+* **State/Data:** Supabase Client (for realtime) + Server Actions (for mutations).
+
+---
+
+## 3. Database Schema (Supabase SQL)
+Please execute the following SQL to set up the database structure. Note the strict game states and payment statuses.
+
+```sql
+-- 1. PROFILES
+create table profiles (
+  id uuid references auth.users not null primary key,
+  email text,
+  display_name text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 2. GOLFERS (Competitors)
+create table golfers (
+  id serial primary key,
+  name text not null,
+  current_rank int, -- Drives the bucket logic
+  live_score int default 0, -- To Par (e.g. -5, +2)
+  thru_hole int default 0,
+  today_score int default 0,
+  status text default 'active', 
+  odds_to_win numeric 
+);
+
+-- 3. GAMES (Lobbies)
+create table games (
+  id uuid default uuid_generate_v4() primary key,
+  admin_id uuid references profiles(id) not null,
+  name text not null,
+  entry_code text unique not null, -- 6-char random code
+  is_locked boolean default false,
+  theme_color text default '#005f40',
+  entry_fee numeric default 0,
+  payment_info text, -- Instructions like "Venmo: @Dave"
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 4. PARTICIPANTS (Link User -> Game)
+create table participants (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references profiles(id) not null,
+  game_id uuid references games(id) not null,
+  payment_status text default 'unpaid' check (payment_status in ('unpaid', 'pending', 'verified')),
+  unique(user_id, game_id)
+);
+
+-- 5. SELECTIONS (The 7 Picks)
+create table selections (
+  id uuid default uuid_generate_v4() primary key,
+  participant_id uuid references participants(id) not null,
+  golfer_id int references golfers(id) not null
+);
+
+-- TRIGGERS
+create or replace function public.handle_new_user() returns trigger as $$
+begin
+  insert into public.profiles (id, email, display_name)
+  values (new.id, new.email, new.raw_user_meta_data->>'full_name');
+  return new;
+end;
+$$ language plpgsql security definer;
+create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();

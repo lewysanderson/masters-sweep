@@ -1,0 +1,267 @@
+The April Major - Masters Golf Sweepstake
+Project Structure
+==========================================
+
+masters-sweep/
+│
+├── 📄 Configuration Files
+│   ├── package.json              # Dependencies and scripts
+│   ├── tsconfig.json             # TypeScript configuration
+│   ├── tailwind.config.ts        # Tailwind CSS theme (Masters green colors)
+│   ├── postcss.config.js         # PostCSS configuration
+│   ├── next.config.js            # Next.js configuration
+│   ├── .eslintrc.json            # ESLint rules
+│   ├── .env.local                # Environment variables
+│   └── .gitignore                # Git ignore patterns
+│
+├── 📖 Documentation
+│   ├── README.md                 # Full project documentation
+│   ├── QUICKSTART.md             # Quick start guide
+│   ├── Master-Prompt.txt         # Original project specifications
+│   └── PROJECT_STRUCTURE.txt     # This file
+│
+├── 🎨 Application Pages (app/)
+│   ├── page.tsx                  # 🏠 Homepage - Landing page with features
+│   ├── layout.tsx                # Root layout with metadata
+│   ├── globals.css               # Global styles and Tailwind directives
+│   │
+│   ├── dashboard/
+│   │   └── page.tsx              # 📊 Dashboard - View your games
+│   │
+│   └── games/
+│       ├── create/
+│       │   └── page.tsx          # ➕ Create Game - Start new sweepstake
+│       │
+│       ├── join/
+│       │   └── page.tsx          # 🔗 Join Game - Enter with code
+│       │
+│       ├── select/
+│       │   └── page.tsx          # ⛳ Select Team - Pick 7 golfers
+│       │
+│       ├── leaderboard/
+│       │   └── page.tsx          # 🏆 Leaderboard - Live rankings
+│       │
+│       └── admin/
+│           └── page.tsx          # 🛡️ Admin Panel - Manage payments
+│
+├── 🧩 Reusable Components (components/)
+│   ├── Header.tsx                # Navigation header with user info
+│   ├── GolferCard.tsx            # Individual golfer display card
+│   └── BucketCounter.tsx         # Selection progress tracker
+│
+├── 📚 Libraries (lib/)
+│   ├── dummy-data.ts             # Demo data for local testing
+│   │   ├── 65 golfers (10 Top 10, 30 Mid 40, 15 Field)
+│   │   ├── 6 users
+│   │   ├── 1 demo game
+│   │   └── 5 participants with selections
+│   │
+│   └── utils.ts                  # Utility functions
+│       ├── cn()                  # Class name merger
+│       ├── getGolferBucket()     # Determine bucket by rank
+│       ├── validateSelection()   # Validate 7-golfer picks
+│       ├── calculateBestFourScore() # Scoring logic
+│       ├── generateLeaderboard() # Rank participants
+│       ├── generateEntryCode()   # Random 6-char codes
+│       ├── formatScore()         # Display golf scores
+│       └── getScoreColor()       # Color coding for scores
+│
+└── 📐 TypeScript Types (types/)
+    └── database.ts               # All TypeScript interfaces
+        ├── Profile               # User profile
+        ├── Golfer                # Competitor data
+        ├── Game                  # Sweepstake game
+        ├── Participant           # User in a game
+        ├── Selection             # Golfer pick
+        ├── LeaderboardEntry      # Ranking data
+        ├── PaymentStatus         # unpaid | pending | verified
+        ├── GolferStatus          # active | cut | withdrawn
+        ├── GolferBucket          # top10 | mid40 | field
+        └── BucketRequirements    # 2-3-2 rule
+
+
+🎯 Key Features by Page
+==========================================
+
+Homepage (/)
+├── Feature showcase cards
+├── How it works guide
+└── Quick navigation to create/join/dashboard
+
+Dashboard (/dashboard)
+├── View active games
+├── Payment status display
+├── Quick access to team selection
+├── Leaderboard link
+└── Admin panel (if admin)
+
+Select Team (/games/select)
+├── Browse all 65 golfers
+├── Search by name
+├── Filter by bucket (Top 10, 11-50, Field)
+├── Visual bucket counter
+├── Real-time validation
+├── Selected team summary
+└── Save when valid (2-3-2 rule)
+
+Leaderboard (/games/leaderboard)
+├── Live rankings (best 4 golfers)
+├── Prize pool display
+├── Each participant's best 4 golfers
+├── Payment status indicators
+├── Current user highlighting
+└── Scoring rules explanation
+
+Admin Panel (/games/admin)
+├── Participant management
+├── Payment verification
+├── Game lock/unlock
+├── Collection statistics
+├── Entry code display
+└── Payment info reminder
+
+Create Game (/games/create)
+├── Set game name
+├── Configure entry fee
+├── Add payment instructions
+└── Auto-generate entry code
+
+Join Game (/games/join)
+├── Enter 6-character code
+└── Validate and join
+
+
+🎨 Design System
+==========================================
+
+Colors:
+├── Masters Green: #005f40 (Primary)
+├── Masters Green Dark: #004830 (Hover states)
+├── Masters Green Light: #007050 (Accents)
+├── Stone: #f5f5f4 (Background)
+└── Bucket Colors:
+    ├── Yellow: Top 10 golfers
+    ├── Blue: Ranks 11-50
+    └── Green: Field (51+)
+
+Components:
+├── .btn-primary      # Masters green button
+├── .btn-secondary    # Stone gray button
+├── .card             # White card with shadow
+├── .input            # Text input with green focus
+└── .label            # Form label
+
+
+📊 Dummy Data Overview
+==========================================
+
+Users (6):
+1. John Smith (Admin) - user-1
+2. Sarah Johnson - user-2
+3. Mike Davis - user-3
+4. Emily Wilson - user-4
+5. Dave Anderson - user-5
+6. Lisa Brown - user-6
+
+Game:
+├── Name: "The April Major 2025"
+├── Code: GOLF25
+├── Entry Fee: $20
+├── Admin: John Smith
+└── Status: Unlocked
+
+Participants (5):
+1. John Smith - Verified, 7 golfers selected
+2. Sarah Johnson - Verified, 7 golfers selected
+3. Mike Davis - Pending, 7 golfers selected
+4. Emily Wilson - Verified, 7 golfers selected
+5. Dave Anderson - Unpaid, 0 golfers selected
+
+Top Golfers (by score):
+1. Tiger Woods: -12 (Field)
+2. Bryson DeChambeau: -10 (Mid 40)
+3. Ludvig Aberg: -9 (Top 10)
+4. Scottie Scheffler: -8 (Top 10)
+5. Brooks Koepka: -7 (Top 10)
+
+
+🔧 NPM Scripts
+==========================================
+
+npm run dev        # Start development server (localhost:3000)
+npm run build      # Build for production
+npm run start      # Run production server
+npm run lint       # Check code quality
+
+
+📏 Selection Rules (2-3-2)
+==========================================
+
+Required:
+├── 2 golfers from Top 10 (Rank 1-10)
+├── 3 golfers from Mid 40 (Rank 11-50)
+└── 2 golfers from Field (Rank 51+)
+
+Scoring:
+├── Your score = Sum of BEST 4 golfers
+├── Lower is better (golf scoring)
+├── Missed cut golfers count at current score
+└── Leaderboard updates live
+
+
+🚀 Next Steps (Production)
+==========================================
+
+1. Install Supabase
+   └── supabase.com → New Project
+
+2. Run SQL Schema
+   └── Copy from Master-Prompt.txt (lines 30-87)
+
+3. Update .env.local
+   ├── NEXT_PUBLIC_SUPABASE_URL
+   ├── NEXT_PUBLIC_SUPABASE_ANON_KEY
+   └── NEXT_PUBLIC_USE_DUMMY_DATA=false
+
+4. Implement Server Actions
+   ├── Create game
+   ├── Join game
+   ├── Save selections
+   ├── Update payments
+   └── Lock/unlock game
+
+5. Add Authentication
+   ├── Supabase Auth
+   ├── Login/signup pages
+   └── Protected routes
+
+6. Enable Real-time
+   └── Supabase subscriptions for live leaderboard
+
+
+✅ What's Working (Demo Mode)
+==========================================
+
+✓ Homepage with feature showcase
+✓ Dashboard with game overview
+✓ Create game with auto-generated codes
+✓ Join game with code validation
+✓ Select 7 golfers with bucket validation
+✓ Search and filter golfers
+✓ Live leaderboard with best 4 scoring
+✓ Admin panel with payment management
+✓ Game lock/unlock functionality
+✓ Responsive design (mobile, tablet, desktop)
+✓ Full TypeScript type safety
+✓ Tailwind CSS styling
+✓ Component reusability
+
+
+📱 Responsive Breakpoints
+==========================================
+
+Mobile: < 768px
+Tablet: 768px - 1024px
+Desktop: > 1024px
+
+All pages adapt to screen size!

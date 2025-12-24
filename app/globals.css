@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --masters-green: #005f40;
+    --masters-green-dark: #004830;
+    --masters-green-light: #007050;
+  }
+
+  body {
+    @apply bg-stone-50 text-stone-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-masters-green hover:bg-masters-green-dark text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-stone-200 hover:bg-stone-300 text-stone-900 font-semibold py-2 px-4 rounded-lg transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-masters-green focus:border-transparent;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-stone-700 mb-2;
+  }
+}
