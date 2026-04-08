@@ -21,27 +21,33 @@ const bucketLabels = {
 };
 
 export default function EntrantDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // ALWAYS call hooks first before any conditional returns
   const resolvedParams = use(params);
-  const entrant = getEntrantById(resolvedParams.id);
   const { data: scoresData } = useLiveScores();
   const { data: leaderboardData } = useLiveLeaderboard();
   
+  // THEN do data lookups
+  const entrant = getEntrantById(resolvedParams.id);
+  
+  // Handle entrant not found
   if (!entrant) {
     return (
       <MobileShell>
-        <div className="p-4">
-          <p className="text-stone-400">Entrant not found</p>
-          <Link href="/entrants" className="text-[var(--masters-green)] mt-2 inline-block">
-            ← Back to Entrants
-          </Link>
+        <div className="p-5">
+          <div className="card p-6 text-center">
+            <p className="text-stone-600 font-semibold mb-2">Entrant not found</p>
+            <Link href="/entrants" className="text-[var(--masters-green)] text-sm font-semibold hover:underline">
+              ← Back to Entrants
+            </Link>
+          </div>
         </div>
       </MobileShell>
     );
   }
   
   // Find entrant's position in leaderboard
-  const leaderboardEntry = leaderboardData?.leaderboard.find(
-    (e) => e.entrant.id === entrant.id
+  const leaderboardEntry = leaderboardData?.leaderboard?.find(
+    (e) => e?.entrant?.id === entrant.id
   );
   
   // Get all golfer IDs for this entrant
@@ -79,7 +85,7 @@ export default function EntrantDetailPage({ params }: { params: Promise<{ id: st
           <div className="card p-6 text-center">
             <p className="text-stone-600 font-semibold mb-2">Error loading team data</p>
             <p className="text-sm text-stone-500 mb-4">Unable to find golfers for this team</p>
-            <Link href="/entrants" className="btn-secondary text-sm">
+            <Link href="/entrants" className="text-[var(--masters-green)] text-sm font-semibold hover:underline">
               ← Back to Entrants
             </Link>
           </div>
