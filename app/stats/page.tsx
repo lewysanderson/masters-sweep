@@ -294,8 +294,8 @@ export default function StatsPage() {
                       </div>
 
                       {/* Chart container with padding and scroll */}
-                      <div className="ml-12 overflow-x-auto pb-4">
-                        <div className="flex items-end gap-3 min-w-max px-2 py-4" style={{ minHeight: '300px' }}>
+                      <div className="ml-12 overflow-x-auto pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        <div className="flex items-end gap-4 min-w-max px-4 py-4">
                           {sortedGolfers.map((golfer) => {
                             const heightPercent = (golfer.pick_count / maxPicks) * 100;
                             const barColor = 
@@ -304,41 +304,48 @@ export default function StatsPage() {
                               'bg-purple-500';
                             
                             return (
-                              <div key={golfer.golfer_id} className="flex flex-col items-center gap-2" style={{ width: '48px', minWidth: '48px' }}>
-                                {/* Bar */}
-                                <div className="relative w-full flex items-end" style={{ height: '200px' }}>
-                                  <div 
-                                    className={`w-full ${barColor} rounded-t-lg transition-all hover:opacity-80 cursor-pointer relative group shadow-sm`}
-                                    style={{ height: `${Math.max(heightPercent, 2)}%`, minHeight: '4px' }}
-                                    title={`${golfer.golfer_name}: ${golfer.pick_count} picks`}
-                                  >
-                                    {/* Pick count on top of bar */}
+                              <div key={golfer.golfer_id} className="flex flex-col items-center" style={{ width: '52px', minWidth: '52px' }}>
+                                {/* Bar container */}
+                                <div className="relative w-full flex flex-col items-center" style={{ height: '200px' }}>
+                                  {/* Pick count above bar */}
+                                  <div className="h-6 flex items-center justify-center">
                                     {golfer.pick_count > 0 && (
-                                      <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-bold text-stone-700">
+                                      <span className="text-[10px] font-bold text-stone-700">
                                         {golfer.pick_count}
-                                      </div>
+                                      </span>
                                     )}
-                                    {/* Tooltip on hover */}
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                                      <div className="bg-stone-900 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
-                                        <p className="font-bold">{golfer.golfer_name}</p>
-                                        <p className="text-stone-300">{golfer.pick_count} picks ({golfer.pick_percentage.toFixed(0)}%)</p>
+                                  </div>
+                                  {/* Bar */}
+                                  <div className="w-full flex-1 flex flex-col justify-end">
+                                    <div 
+                                      className={`w-full ${barColor} rounded-t-lg transition-all hover:opacity-80 cursor-pointer relative group shadow-sm`}
+                                      style={{ height: `${Math.max(heightPercent, 2)}%`, minHeight: '4px' }}
+                                      title={`${golfer.golfer_name}: ${golfer.pick_count} picks`}
+                                    >
+                                      {/* Tooltip on hover */}
+                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10 pointer-events-none">
+                                        <div className="bg-stone-900 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                                          <p className="font-bold">{golfer.golfer_name}</p>
+                                          <p className="text-stone-300">{golfer.pick_count} picks ({golfer.pick_percentage.toFixed(0)}%)</p>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                                {/* Player name (last name only, rotated) */}
-                                <div className="w-full flex justify-center" style={{ height: '70px' }}>
-                                  <p 
-                                    className="text-[9px] font-semibold text-stone-600 origin-bottom-left whitespace-nowrap"
-                                    style={{ 
-                                      transform: 'rotate(-45deg) translateX(-10px)',
-                                      width: '70px',
-                                      textAlign: 'left'
-                                    }}
-                                  >
-                                    {golfer.golfer_name.split(' ').pop()}
-                                  </p>
+                                {/* Player name label area */}
+                                <div className="relative w-full mt-2" style={{ height: '60px' }}>
+                                  <div className="absolute left-0 top-0 w-full h-full flex items-start justify-center">
+                                    <span 
+                                      className="text-[10px] font-semibold text-stone-700 whitespace-nowrap inline-block"
+                                      style={{ 
+                                        transform: 'rotate(-45deg)',
+                                        transformOrigin: 'top center',
+                                        marginTop: '8px'
+                                      }}
+                                    >
+                                      {golfer.golfer_name.split(' ').pop()}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             );
