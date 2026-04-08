@@ -285,7 +285,7 @@ export default function StatsPage() {
                   return (
                     <>
                       {/* Y-axis labels */}
-                      <div className="absolute left-0 top-0 bottom-20 flex flex-col justify-between text-xs text-stone-500 font-mono pr-3">
+                      <div className="absolute left-0 top-0 bottom-16 flex flex-col justify-between text-[10px] text-stone-500 font-mono pr-2">
                         <span>{maxPicks}</span>
                         <span>{Math.floor(maxPicks * 0.75)}</span>
                         <span>{Math.floor(maxPicks * 0.5)}</span>
@@ -294,23 +294,28 @@ export default function StatsPage() {
                       </div>
 
                       {/* Chart container with padding and scroll */}
-                      <div className="ml-12 overflow-x-auto pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
-                        <div className="flex items-end gap-4 min-w-max px-4 py-4">
-                          {sortedGolfers.map((golfer) => {
+                      <div className="ml-10 overflow-x-auto pb-2 relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        <div className="flex items-end gap-2 min-w-max px-2 py-2">
+                          {sortedGolfers.map((golfer, index) => {
                             const heightPercent = (golfer.pick_count / maxPicks) * 100;
                             const barColor = 
                               golfer.bucket === 'top12' ? 'bg-amber-500' :
                               golfer.bucket === 'mid' ? 'bg-blue-500' :
                               'bg-purple-500';
                             
+                            // Calculate if tooltip should flip to left/right to stay visible
+                            const totalGolfers = sortedGolfers.length;
+                            const isNearStart = index < 3;
+                            const isNearEnd = index > totalGolfers - 4;
+                            
                             return (
-                              <div key={golfer.golfer_id} className="flex flex-col items-center" style={{ width: '52px', minWidth: '52px' }}>
+                              <div key={golfer.golfer_id} className="flex flex-col items-center" style={{ width: '32px', minWidth: '32px' }}>
                                 {/* Bar container */}
-                                <div className="relative w-full flex flex-col items-center" style={{ height: '200px' }}>
+                                <div className="relative w-full flex flex-col items-center" style={{ height: '150px' }}>
                                   {/* Pick count above bar */}
-                                  <div className="h-6 flex items-center justify-center">
+                                  <div className="h-4 flex items-center justify-center">
                                     {golfer.pick_count > 0 && (
-                                      <span className="text-[10px] font-bold text-stone-700">
+                                      <span className="text-[8px] font-bold text-stone-700">
                                         {golfer.pick_count}
                                       </span>
                                     )}
@@ -318,29 +323,30 @@ export default function StatsPage() {
                                   {/* Bar */}
                                   <div className="w-full flex-1 flex flex-col justify-end">
                                     <div 
-                                      className={`w-full ${barColor} rounded-t-lg transition-all hover:opacity-80 cursor-pointer relative group shadow-sm`}
-                                      style={{ height: `${Math.max(heightPercent, 2)}%`, minHeight: '4px' }}
-                                      title={`${golfer.golfer_name}: ${golfer.pick_count} picks`}
+                                      className={`w-full ${barColor} rounded-t transition-all hover:opacity-80 cursor-pointer relative group`}
+                                      style={{ height: `${Math.max(heightPercent, 2)}%`, minHeight: '3px' }}
                                     >
-                                      {/* Tooltip on hover */}
-                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10 pointer-events-none">
-                                        <div className="bg-stone-900 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                                      {/* Tooltip on hover - positioned to stay visible */}
+                                      <div className={`absolute bottom-full mb-1 hidden group-hover:block z-50 ${
+                                        isNearStart ? 'left-0' : isNearEnd ? 'right-0' : 'left-1/2 -translate-x-1/2'
+                                      }`}>
+                                        <div className="bg-stone-900 text-white text-[10px] rounded py-1.5 px-2 whitespace-nowrap shadow-xl border border-stone-700">
                                           <p className="font-bold">{golfer.golfer_name}</p>
-                                          <p className="text-stone-300">{golfer.pick_count} picks ({golfer.pick_percentage.toFixed(0)}%)</p>
+                                          <p className="text-stone-300 text-[9px]">{golfer.pick_count} picks • {golfer.pick_percentage.toFixed(0)}%</p>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                                 {/* Player name label area */}
-                                <div className="relative w-full mt-2" style={{ height: '60px' }}>
+                                <div className="relative w-full mt-1" style={{ height: '45px' }}>
                                   <div className="absolute left-0 top-0 w-full h-full flex items-start justify-center">
                                     <span 
-                                      className="text-[10px] font-semibold text-stone-700 whitespace-nowrap inline-block"
+                                      className="text-[8px] font-semibold text-stone-600 whitespace-nowrap inline-block"
                                       style={{ 
                                         transform: 'rotate(-45deg)',
                                         transformOrigin: 'top center',
-                                        marginTop: '8px'
+                                        marginTop: '6px'
                                       }}
                                     >
                                       {golfer.golfer_name.split(' ').pop()}

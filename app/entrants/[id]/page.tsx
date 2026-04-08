@@ -53,17 +53,41 @@ export default function EntrantDetailPage({ params }: { params: Promise<{ id: st
   
   // Get golfers with live scores
   const teamGolfers = allGolferIds.map((id) => {
-    const liveGolfer = scoresData?.golfers.find((g) => g.id === id);
+    // Try live scores first
+    const liveGolfer = scoresData?.golfers?.find((g) => g?.id === id);
     if (liveGolfer) return liveGolfer;
     
     // Fallback to dummy data
-    const dummyGolfer = allGolfers.find((g) => g.id === id);
-    return dummyGolfer;
+    const dummyGolfer = allGolfers.find((g) => g?.id === id);
+    if (dummyGolfer) return dummyGolfer;
+    
+    // Log error if golfer not found
+    console.error(`Golfer with ID ${id} not found in either live scores or dummy data`);
+    return null;
   }).filter((g): g is NonNullable<typeof g> => g !== null && g !== undefined);
   
-  // Determine best 4
-  const bestFourIds = new Set(leaderboardEntry?.best_four_golfers.map(g => g.id) || []);
+  // Determine best 4 (with defensive checks)
+  const bestFourIds = new Set(
+    leaderboardEntry?.best_four_golfers?.map(g => g?.id).filter(Boolean) || []
+  );
   
+  // Check if we have team data
+  if (teamGolfers.length === 0) {
+    return (
+      <MobileShell>
+        <div className="p-5">
+          <div className="card p-6 text-center">
+            <p className="text-stone-600 font-semibold mb-2">Error loading team data</p>
+            <p className="text-sm text-stone-500 mb-4">Unable to find golfers for this team</p>
+            <Link href="/entrants" className="btn-secondary text-sm">
+              ← Back to Entrants
+            </Link>
+          </div>
+        </div>
+      </MobileShell>
+    );
+  }
+
   return (
     <MobileShell>
       <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
@@ -72,7 +96,7 @@ export default function EntrantDetailPage({ params }: { params: Promise<{ id: st
           Back to Entrants
         </Link>
         <h1 className="text-3xl font-serif font-bold text-white">{entrant.name}</h1>
-        {leaderboardEntry && (
+        {leaderboardEntry && leaderboardEntry.rank && leaderboardEntry.total_score !== undefined && (
           <div className="flex items-center gap-6 mt-3">
             <div className="flex items-center gap-2 text-white/90">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20">
