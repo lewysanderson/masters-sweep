@@ -57,29 +57,35 @@ export default function EntrantDetailPage({ params }: { params: Promise<{ id: st
     if (liveGolfer) return liveGolfer;
     
     // Fallback to dummy data
-    return allGolfers.find((g) => g.id === id);
-  }).filter(Boolean);
+    const dummyGolfer = allGolfers.find((g) => g.id === id);
+    return dummyGolfer;
+  }).filter((g): g is NonNullable<typeof g> => g !== null && g !== undefined);
   
   // Determine best 4
   const bestFourIds = new Set(leaderboardEntry?.best_four_golfers.map(g => g.id) || []);
   
   return (
     <MobileShell>
-      <div className="bg-gradient-to-br from-[var(--masters-green)] to-[var(--masters-green-dark)] px-5 pt-14 pb-6">
-        <Link href="/entrants" className="text-white/80 text-sm flex items-center gap-1 mb-3 hover:text-white">
-          <ArrowLeft size={16} />
+      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
+        <Link href="/entrants" className="text-white/80 text-xs font-semibold flex items-center gap-2 mb-4 hover:text-white uppercase tracking-wider">
+          <ArrowLeft size={14} />
           Back to Entrants
         </Link>
-        <h1 className="text-2xl font-bold text-white">{entrant.name}</h1>
+        <h1 className="text-3xl font-serif font-bold text-white">{entrant.name}</h1>
         {leaderboardEntry && (
-          <div className="flex items-center gap-4 mt-2">
+          <div className="flex items-center gap-6 mt-3">
             <div className="flex items-center gap-2 text-white/90">
-              <Trophy size={16} />
-              <span className="text-sm">Position: #{leaderboardEntry.rank}</span>
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20">
+                <Trophy size={14} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-white/60">Position</p>
+                <p className="text-lg font-bold">#{leaderboardEntry.rank}</p>
+              </div>
             </div>
             <div className="text-white/90">
-              <span className="text-sm">Score: </span>
-              <span className="text-lg font-bold">{formatScore(leaderboardEntry.total_score)}</span>
+              <p className="text-[10px] uppercase tracking-wider text-white/60">Score</p>
+              <p className="text-2xl font-bold tabular-nums">{formatScore(leaderboardEntry.total_score)}</p>
             </div>
           </div>
         )}
@@ -93,8 +99,11 @@ export default function EntrantDetailPage({ params }: { params: Promise<{ id: st
           </h2>
           <div className="space-y-2">
             {entrant.team.top12.map((golferId) => {
-              const golfer = teamGolfers.find((g) => g?.id === golferId);
-              if (!golfer) return null;
+              const golfer = teamGolfers.find((g) => g.id === golferId);
+              if (!golfer) {
+                console.error(`Golfer with ID ${golferId} not found`);
+                return null;
+              }
               
               const isBestFour = bestFourIds.has(golfer.id);
               
@@ -137,8 +146,11 @@ export default function EntrantDetailPage({ params }: { params: Promise<{ id: st
           </h2>
           <div className="space-y-2">
             {entrant.team.mid.map((golferId) => {
-              const golfer = teamGolfers.find((g) => g?.id === golferId);
-              if (!golfer) return null;
+              const golfer = teamGolfers.find((g) => g.id === golferId);
+              if (!golfer) {
+                console.error(`Golfer with ID ${golferId} not found`);
+                return null;
+              }
               
               const isBestFour = bestFourIds.has(golfer.id);
               
@@ -181,8 +193,11 @@ export default function EntrantDetailPage({ params }: { params: Promise<{ id: st
           </h2>
           <div className="space-y-2">
             {entrant.team.wildcard.map((golferId) => {
-              const golfer = teamGolfers.find((g) => g?.id === golferId);
-              if (!golfer) return null;
+              const golfer = teamGolfers.find((g) => g.id === golferId);
+              if (!golfer) {
+                console.error(`Golfer with ID ${golferId} not found`);
+                return null;
+              }
               
               const isBestFour = bestFourIds.has(golfer.id);
               
