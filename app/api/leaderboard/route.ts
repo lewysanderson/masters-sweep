@@ -31,15 +31,10 @@ export async function GET(request: Request) {
         ...entrant.team.wildcard,
       ];
       
-      // Get golfers with live scores
-      const entrantGolfers = allGolferIds.map((id) => {
-        const liveGolfer = espnGolfersMap.get(id);
-        if (liveGolfer) return liveGolfer;
-        
-        // Fallback to dummy data
-        const dummyGolfer = allGolfers.find((g) => g.id === id);
-        return dummyGolfer!;
-      }).filter(Boolean);
+      // Get golfers with live scores only (no dummy data fallback)
+      const entrantGolfers = allGolferIds
+        .map((id) => espnGolfersMap.get(id))
+        .filter((g): g is Golfer => g !== null && g !== undefined);
       
       // Calculate best 4 scores
       const { total, bestFour } = calculateScore(entrantGolfers);

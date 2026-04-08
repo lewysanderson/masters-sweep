@@ -53,7 +53,10 @@ export async function GET(request: Request) {
     
     allGolfers.forEach(golfer => {
       const pickCount = pickCounts.get(golfer.id) || 0;
-      const liveGolfer = espnGolfersMap.get(golfer.id) || golfer;
+      // Only use live data, skip if not available
+      const liveGolfer = espnGolfersMap.get(golfer.id);
+      if (!liveGolfer) return; // Skip golfers without live data
+      
       const odds = oddsMap.get(golfer.name);
       const impliedProbability = odds ? (1 / odds) : undefined;
       

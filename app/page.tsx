@@ -87,7 +87,7 @@ export default function HomePage() {
         )}
 
         {/* Top 3 Sweep Leaders */}
-        {leaderboardData && leaderboardData.leaderboard.length > 0 && (
+        {!isPre && leaderboardData && leaderboardData.leaderboard.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-serif font-bold text-stone-900">Sweep Leaderboard</h2>

@@ -30,6 +30,10 @@ export default function PlayersPage() {
   const [filter, setFilter] = useState<GolferBucket | 'all'>('all');
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'rank' | 'score'>('rank');
+  
+  // Check tournament status
+  const tournamentStatus = data?.tournament?.status || 'pre';
+  const tournamentStarted = tournamentStatus === 'in' || tournamentStatus === 'post';
 
   const golfers = useMemo(() => {
     if (!data?.golfers) return [];
@@ -120,7 +124,7 @@ export default function PlayersPage() {
             return (
               <div key={golfer.id} className="card p-3 flex items-center gap-3">
                 {/* On Course Indicator */}
-                {golfer.on_course && (
+                {tournamentStarted && golfer.on_course && (
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
                 )}
                 
@@ -137,12 +141,12 @@ export default function PlayersPage() {
                       {golfer.bucket === 'top12' ? 'TOP 12' : 
                        golfer.bucket === 'mid' ? '13-50' : '51+'}
                     </span>
-                    {golfer.status === 'cut' && (
+                    {tournamentStarted && golfer.status === 'cut' && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">
                         CUT
                       </span>
                     )}
-                    {golfer.thru_hole !== null && (
+                    {tournamentStarted && golfer.thru_hole !== null && (
                       <span className="text-xs text-stone-400">
                         {golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}
                       </span>
@@ -153,12 +157,12 @@ export default function PlayersPage() {
                 {/* Scores */}
                 <div className="text-right">
                   <p className={`text-lg font-bold tabular-nums ${
-                    (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                    (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
+                    tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
+                    tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
                   }`}>
-                    {formatScore(golfer.live_score)}
+                    {tournamentStarted ? formatScore(golfer.live_score) : '--'}
                   </p>
-                  {golfer.today_score !== null && (
+                  {tournamentStarted && golfer.today_score !== null && (
                     <p className="text-xs text-stone-400 tabular-nums">
                       R{data?.tournament.current_round || 1}: {formatScore(golfer.today_score)}
                     </p>

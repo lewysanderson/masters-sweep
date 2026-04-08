@@ -3,7 +3,6 @@
 import MobileShell from '@/components/MobileShell';
 import { getEntrantById } from '@/lib/entrants-config';
 import { useLiveScores, useLiveLeaderboard } from '@/lib/hooks/use-live-scores';
-import { allGolfers } from '@/lib/dummy-data';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,6 +22,10 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
   // ALWAYS call hooks first before any conditional returns
   const { data: scoresData } = useLiveScores();
   const { data: leaderboardData } = useLiveLeaderboard();
+  
+  // Check tournament status
+  const tournamentStatus = scoresData?.tournament?.status || 'pre';
+  const tournamentStarted = tournamentStatus === 'in' || tournamentStatus === 'post';
   
   // THEN do data lookups
   const entrant = getEntrantById(params.id);
@@ -55,19 +58,11 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
     ...entrant.team.wildcard,
   ];
   
-  // Get golfers with live scores
+  // Get golfers with live scores only
   const teamGolfers = allGolferIds.map((id) => {
-    // Try live scores first
+    // Only use live scores from ESPN API
     const liveGolfer = scoresData?.golfers?.find((g) => g?.id === id);
-    if (liveGolfer) return liveGolfer;
-    
-    // Fallback to dummy data
-    const dummyGolfer = allGolfers.find((g) => g?.id === id);
-    if (dummyGolfer) return dummyGolfer;
-    
-    // Log error if golfer not found
-    console.error(`Golfer with ID ${id} not found in either live scores or dummy data`);
-    return null;
+    return liveGolfer || null;
   }).filter((g): g is NonNullable<typeof g> => g !== null && g !== undefined);
   
   // Determine best 4 (with defensive checks)
@@ -100,7 +95,7 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
           Back to Entrants
         </Link>
         <h1 className="text-3xl font-serif font-bold text-white">{entrant.name}</h1>
-        {leaderboardEntry && leaderboardEntry.rank && leaderboardEntry.total_score !== undefined && (
+        {tournamentStarted && leaderboardEntry && leaderboardEntry.rank && leaderboardEntry.total_score !== undefined && (
           <div className="flex items-center gap-6 mt-3">
             <div className="flex items-center gap-2 text-white/90">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20">
@@ -149,16 +144,16 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
                       </div>
                       <p className="text-xs text-stone-400">
                         Rank #{golfer.world_rank}
-                        {golfer.status === 'cut' && ' • CUT'}
-                        {golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
+                        {tournamentStarted && golfer.status === 'cut' && ' • CUT'}
+                        {tournamentStarted && golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
                       </p>
                     </div>
                     <p className={`text-lg font-bold tabular-nums ${
-                      (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                      (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
+                      tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
+                      tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
                     }`}>
-                      {formatScore(golfer.live_score)}
-                      {golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
+                      {tournamentStarted ? formatScore(golfer.live_score) : '--'}
+                      {tournamentStarted && golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
                     </p>
                   </div>
                 </div>
@@ -196,16 +191,16 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
                       </div>
                       <p className="text-xs text-stone-400">
                         Rank #{golfer.world_rank}
-                        {golfer.status === 'cut' && ' • CUT'}
-                        {golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
+                        {tournamentStarted && golfer.status === 'cut' && ' • CUT'}
+                        {tournamentStarted && golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
                       </p>
                     </div>
                     <p className={`text-lg font-bold tabular-nums ${
-                      (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                      (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
+                      tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
+                      tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
                     }`}>
-                      {formatScore(golfer.live_score)}
-                      {golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
+                      {tournamentStarted ? formatScore(golfer.live_score) : '--'}
+                      {tournamentStarted && golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
                     </p>
                   </div>
                 </div>
@@ -243,16 +238,16 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
                       </div>
                       <p className="text-xs text-stone-400">
                         Rank #{golfer.world_rank}
-                        {golfer.status === 'cut' && ' • CUT'}
-                        {golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
+                        {tournamentStarted && golfer.status === 'cut' && ' • CUT'}
+                        {tournamentStarted && golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
                       </p>
                     </div>
                     <p className={`text-lg font-bold tabular-nums ${
-                      (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                      (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
+                      tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
+                      tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
                     }`}>
-                      {formatScore(golfer.live_score)}
-                      {golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
+                      {tournamentStarted ? formatScore(golfer.live_score) : '--'}
+                      {tournamentStarted && golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
                     </p>
                   </div>
                 </div>
