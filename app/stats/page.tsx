@@ -285,7 +285,7 @@ export default function StatsPage() {
                   return (
                     <>
                       {/* Y-axis labels */}
-                      <div className="absolute left-0 top-0 bottom-16 flex flex-col justify-between text-[10px] text-stone-500 font-mono pr-2">
+                      <div className="absolute left-0 top-12 bottom-16 flex flex-col justify-between text-[10px] text-stone-500 font-mono pr-2">
                         <span>{maxPicks}</span>
                         <span>{Math.floor(maxPicks * 0.75)}</span>
                         <span>{Math.floor(maxPicks * 0.5)}</span>
@@ -294,8 +294,11 @@ export default function StatsPage() {
                       </div>
 
                       {/* Chart container with padding and scroll */}
-                      <div className="ml-10 overflow-x-auto pb-2 relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-                        <div className="flex items-end gap-2 min-w-max px-2 py-2">
+                      <div className="ml-12 overflow-x-auto pb-4 relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        {/* Top padding for tooltips */}
+                        <div className="h-12"></div>
+                        
+                        <div className="flex items-end gap-3 min-w-max px-6 py-2">
                           {sortedGolfers.map((golfer, index) => {
                             const heightPercent = (golfer.pick_count / maxPicks) * 100;
                             const barColor = 
@@ -305,15 +308,15 @@ export default function StatsPage() {
                             
                             // Calculate if tooltip should flip to left/right to stay visible
                             const totalGolfers = sortedGolfers.length;
-                            const isNearStart = index < 3;
-                            const isNearEnd = index > totalGolfers - 4;
+                            const isNearStart = index < 2;
+                            const isNearEnd = index > totalGolfers - 3;
                             
                             return (
-                              <div key={golfer.golfer_id} className="flex flex-col items-center" style={{ width: '32px', minWidth: '32px' }}>
+                              <div key={golfer.golfer_id} className="flex flex-col items-center" style={{ width: '34px', minWidth: '34px' }}>
                                 {/* Bar container */}
                                 <div className="relative w-full flex flex-col items-center" style={{ height: '150px' }}>
                                   {/* Pick count above bar */}
-                                  <div className="h-4 flex items-center justify-center">
+                                  <div className="h-5 flex items-center justify-center">
                                     {golfer.pick_count > 0 && (
                                       <span className="text-[8px] font-bold text-stone-700">
                                         {golfer.pick_count}
@@ -327,19 +330,19 @@ export default function StatsPage() {
                                       style={{ height: `${Math.max(heightPercent, 2)}%`, minHeight: '3px' }}
                                     >
                                       {/* Tooltip on hover - positioned to stay visible */}
-                                      <div className={`absolute bottom-full mb-1 hidden group-hover:block z-50 ${
+                                      <div className={`absolute bottom-full mb-2 hidden group-hover:flex z-50 pointer-events-none ${
                                         isNearStart ? 'left-0' : isNearEnd ? 'right-0' : 'left-1/2 -translate-x-1/2'
                                       }`}>
-                                        <div className="bg-stone-900 text-white text-[10px] rounded py-1.5 px-2 whitespace-nowrap shadow-xl border border-stone-700">
-                                          <p className="font-bold">{golfer.golfer_name}</p>
-                                          <p className="text-stone-300 text-[9px]">{golfer.pick_count} picks • {golfer.pick_percentage.toFixed(0)}%</p>
+                                        <div className="bg-stone-900 text-white text-[10px] rounded-md py-2 px-2.5 whitespace-nowrap shadow-2xl border border-stone-600">
+                                          <p className="font-bold leading-tight">{golfer.golfer_name}</p>
+                                          <p className="text-stone-300 text-[9px] mt-0.5 leading-tight">{golfer.pick_count} picks • {golfer.pick_percentage.toFixed(0)}%</p>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                                 {/* Player name label area */}
-                                <div className="relative w-full mt-1" style={{ height: '45px' }}>
+                                <div className="relative w-full mt-1.5" style={{ height: '45px' }}>
                                   <div className="absolute left-0 top-0 w-full h-full flex items-start justify-center">
                                     <span 
                                       className="text-[8px] font-semibold text-stone-600 whitespace-nowrap inline-block"
