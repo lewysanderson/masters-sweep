@@ -1,6 +1,5 @@
 'use client';
 
-import { use } from 'react';
 import MobileShell from '@/components/MobileShell';
 import { getEntrantById } from '@/lib/entrants-config';
 import { useLiveScores, useLiveLeaderboard } from '@/lib/hooks/use-live-scores';
@@ -20,14 +19,13 @@ const bucketLabels = {
   wildcard: 'Wildcard (51+)',
 };
 
-export default function EntrantDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EntrantDetailPage({ params }: { params: { id: string } }) {
   // ALWAYS call hooks first before any conditional returns
-  const resolvedParams = use(params);
   const { data: scoresData } = useLiveScores();
   const { data: leaderboardData } = useLiveLeaderboard();
   
   // THEN do data lookups
-  const entrant = getEntrantById(resolvedParams.id);
+  const entrant = getEntrantById(params.id);
   
   // Handle entrant not found
   if (!entrant) {
