@@ -27,34 +27,35 @@ function EntryRow({ entry, expanded, onToggle }: {
   };
 
   return (
-    <div className="card">
-      <button onClick={onToggle} className="w-full flex items-center gap-3 p-4">
-        <div className="w-8 text-center">
-          {entry.rank <= 3 ? (
-            <Trophy size={20} className={medalColors[entry.rank] || 'text-stone-400'} />
-          ) : (
-            <span className="text-sm font-bold text-stone-400">{entry.rank}</span>
-          )}
+    <div className={`card card-hover ${entry.rank === 1 ? 'border-2 border-[var(--masters-gold)]' : ''}`}>
+      <button onClick={onToggle} className="w-full flex items-center gap-4 p-5">
+        <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${
+          entry.rank === 1 ? 'bg-[var(--masters-gold)] text-white' :
+          entry.rank === 2 ? 'bg-stone-300 text-stone-700' :
+          entry.rank === 3 ? 'bg-amber-700 text-white' :
+          'bg-stone-100 text-stone-500'
+        }`}>
+          {entry.rank}
         </div>
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
-            <p className="font-semibold text-sm text-stone-900">
+            <p className="font-bold text-stone-900">
               {entry.entrant.name}
             </p>
             {entry.prize_position && (
-              <span className="text-sm">{prizeLabels[entry.prize_position]}</span>
+              <span className="text-lg">{prizeLabels[entry.prize_position]}</span>
             )}
           </div>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-stone-500 mt-0.5">
             Best 4 of {entry.all_golfers.length} golfers
           </p>
         </div>
-        <span className={`text-lg font-bold tabular-nums ${
+        <span className={`text-2xl font-bold tabular-nums ${
           entry.total_score < 0 ? 'text-red-600' : entry.total_score > 0 ? 'text-blue-600' : 'text-stone-600'
         }`}>
           {formatScore(entry.total_score)}
         </span>
-        {expanded ? <ChevronUp size={16} className="text-stone-400" /> : <ChevronDown size={16} className="text-stone-400" />}
+        {expanded ? <ChevronUp size={18} className="text-stone-400" /> : <ChevronDown size={18} className="text-stone-400" />}
       </button>
 
       {expanded && (
@@ -97,18 +98,21 @@ export default function LeaderboardPage() {
 
   return (
     <MobileShell>
-      <div className="bg-gradient-to-br from-[var(--masters-green)] to-[var(--masters-green-dark)] px-5 pt-14 pb-6">
+      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
-            <p className="text-white/60 text-sm mt-1">
-              {data ? `${data.leaderboard.length} entrants` : 'Loading...'}
+            <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
+              Sweep Standings
+            </div>
+            <h1 className="text-3xl font-serif font-bold text-white">Leaderboard</h1>
+            <p className="text-white/70 text-sm mt-2">
+              {data ? `${data.leaderboard.length} Entrants` : 'Loading...'}
             </p>
           </div>
           {data?.timestamp && (
             <div className="text-right">
-              <p className="text-xs text-white/60">{formatLastUpdated(data.timestamp)}</p>
-              {isValidating && <p className="text-xs text-white/80 animate-pulse">Updating...</p>}
+              <p className="text-xs text-white/70">{formatLastUpdated(data.timestamp)}</p>
+              {isValidating && <p className="text-xs text-white/90 animate-pulse mt-1">Updating...</p>}
             </div>
           )}
         </div>

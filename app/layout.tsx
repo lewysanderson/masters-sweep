@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-
 export const metadata: Metadata = {
-  title: 'The Masters 2026 - Sweepstake',
-  description: 'Pick your dream team for The Masters 2026',
+  title: 'The Masters 2026 - Golf Sweep',
+  description: 'A tradition unlike any other. Follow your picks for The Masters 2026.',
 };
 
 export const viewport: Viewport = {
@@ -23,8 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="font-sans">
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body className="font-sans antialiased">
         {children}
       </body>
     </html>

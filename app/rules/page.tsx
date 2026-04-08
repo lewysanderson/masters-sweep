@@ -11,31 +11,38 @@ export default function RulesPage() {
   
   return (
     <MobileShell>
-      <div className="bg-gradient-to-br from-[var(--masters-green)] to-[var(--masters-green-dark)] px-5 pt-14 pb-6">
-        <h1 className="text-2xl font-bold text-white">Rules</h1>
-        <p className="text-white/60 text-sm mt-1">How the sweep works</p>
+      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
+        <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
+          Competition Format
+        </div>
+        <h1 className="text-3xl font-serif font-bold text-white">Rules</h1>
+        <p className="text-white/70 text-sm mt-2">How the sweep works</p>
       </div>
 
-      <div className="px-5 pt-4 space-y-6">
+      <div className="px-5 space-y-6">
         {/* Overview */}
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Trophy className="w-5 h-5 text-[var(--masters-green)]" />
-            <h2 className="text-lg font-bold">Overview</h2>
+        <div className="card-elevated">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--masters-gold-light)]">
+              <Trophy className="w-5 h-5 text-[var(--masters-gold)]" />
+            </div>
+            <h2 className="text-xl font-serif font-bold">Overview</h2>
           </div>
-          <p className="text-sm text-stone-600 leading-relaxed">
+          <p className="text-stone-700 leading-relaxed">
             Pick a team of 7 golfers from The Masters field. Your score is the combined total of your 
-            <strong> best 4 golfers</strong>. Lowest score wins!
+            <strong className="text-[var(--masters-green)]"> best 4 golfers</strong>. Lowest score wins!
           </p>
         </div>
 
         {/* Team Selection */}
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Users className="w-5 h-5 text-[var(--masters-green)]" />
-            <h2 className="text-lg font-bold">Team Selection</h2>
+        <div className="card-elevated">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--masters-green-lighter)]">
+              <Users className="w-5 h-5 text-[var(--masters-green)]" />
+            </div>
+            <h2 className="text-xl font-serif font-bold">Team Selection</h2>
           </div>
-          <p className="text-sm text-stone-600 mb-4">
+          <p className="text-stone-700 mb-5 font-medium">
             You must pick exactly 7 golfers following these rules:
           </p>
           <div className="space-y-3">

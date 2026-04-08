@@ -15,9 +15,12 @@ export default function EntrantsPage() {
   
   return (
     <MobileShell>
-      <div className="bg-gradient-to-br from-[var(--masters-green)] to-[var(--masters-green-dark)] px-5 pt-14 pb-6">
-        <h1 className="text-2xl font-bold text-white">Entrants</h1>
-        <p className="text-white/60 text-sm mt-1">{ENTRANTS.length} teams competing</p>
+      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
+        <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
+          Competitors
+        </div>
+        <h1 className="text-3xl font-serif font-bold text-white">Entrants</h1>
+        <p className="text-white/70 text-sm mt-2">{ENTRANTS.length} Teams Competing</p>
       </div>
 
       <div className="px-5 pt-4 space-y-3">
@@ -40,27 +43,29 @@ export default function EntrantsPage() {
             
             return (
               <Link href={`/entrants/${entrant.id}`} key={entrant.id}>
-                <div className="card p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-lg">{entrant.name}</h3>
-                    <Users className="w-5 h-5 text-[var(--masters-green)]" />
+                <div className="card card-hover p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-lg text-stone-900">{entrant.name}</h3>
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--masters-green-lighter)]">
+                      <Users className="w-5 h-5 text-[var(--masters-green)]" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-stone-500">
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                      {entrant.team.top12.length} Top 12
+                  <div className="flex items-center gap-4 text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                      <span className="font-semibold text-stone-700">{entrant.team.top12.length} Top 12</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      {entrant.team.mid.length} Mid
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                      <span className="font-semibold text-stone-700">{entrant.team.mid.length} Mid</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                      {entrant.team.wildcard.length} Wildcard
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                      <span className="font-semibold text-stone-700">{entrant.team.wildcard.length} Wild</span>
                     </span>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-stone-100">
-                    <p className="text-sm text-[var(--masters-green)] font-semibold">
+                  <div className="mt-4 pt-4 border-t-2 border-stone-100">
+                    <p className="text-xs font-bold text-[var(--masters-green)] uppercase tracking-wider">
                       View Team →
                     </p>
                   </div>

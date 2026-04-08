@@ -49,18 +49,21 @@ export default function PlayersPage() {
 
   return (
     <MobileShell>
-      <div className="bg-gradient-to-br from-[var(--masters-green)] to-[var(--masters-green-dark)] px-5 pt-14 pb-6">
+      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Field</h1>
-            <p className="text-white/60 text-sm mt-1">
-              {data ? `${data.golfers.length} players` : 'Loading...'}
+            <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
+              Tournament Field
+            </div>
+            <h1 className="text-3xl font-serif font-bold text-white">Players</h1>
+            <p className="text-white/70 text-sm mt-2">
+              {data ? `${data.golfers.length} Competitors` : 'Loading...'}
             </p>
           </div>
           {data?.timestamp && (
             <div className="text-right">
-              <p className="text-xs text-white/60">{formatLastUpdated(data.timestamp)}</p>
-              {isValidating && <p className="text-xs text-white/80 animate-pulse">Updating...</p>}
+              <p className="text-xs text-white/70">{formatLastUpdated(data.timestamp)}</p>
+              {isValidating && <p className="text-xs text-white/90 animate-pulse mt-1">Updating...</p>}
             </div>
           )}
         </div>

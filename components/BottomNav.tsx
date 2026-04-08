@@ -16,14 +16,17 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-stone-200 pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t-2 border-stone-200 pb-[env(safe-area-inset-bottom)] shadow-2xl">
+      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link key={href} href={href} className={active ? 'nav-item-active' : 'nav-item-inactive'}>
-              <Icon size={22} strokeWidth={active ? 2.5 : 1.5} />
-              <span>{label}</span>
+              <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+              <span className="text-[10px]">{label}</span>
+              {active && (
+                <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-[var(--masters-gold)] rounded-full" />
+              )}
             </Link>
           );
         })}
