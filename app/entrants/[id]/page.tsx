@@ -3,13 +3,29 @@
 import MobileShell from '@/components/MobileShell';
 import { getEntrantById } from '@/lib/entrants-config';
 import { useLiveScores, useLiveLeaderboard } from '@/lib/hooks/use-live-scores';
+import { allGolfers } from '@/lib/dummy-data';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import Link from 'next/link';
+import { Golfer } from '@/types/database';
 
 function formatScore(score: number | null): string {
-  if (score === null) return '--';
+  if (score === null) return 'E';
   if (score === 0) return 'E';
   return score > 0 ? `+${score}` : `${score}`;
+}
+
+function getRoundStatus(golfer: any, currentRound: number, tournamentStarted: boolean): string {
+  if (!tournamentStarted) return 'Not started';
+  
+  if (golfer.thru_hole === null) {
+    return 'Not started';
+  }
+  
+  if (golfer.thru_hole === 18) {
+    return `Round ${currentRound} - F`;
+  }
+  
+  return `Round ${currentRound} - Thru ${golfer.thru_hole}`;
 }
 
 const bucketLabels = {
@@ -58,12 +74,34 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
     ...entrant.team.wildcard,
   ];
   
-  // Get golfers with live scores only
-  const teamGolfers = allGolferIds.map((id) => {
-    // Only use live scores from ESPN API
-    const liveGolfer = scoresData?.golfers?.find((g) => g?.id === id);
-    return liveGolfer || null;
-  }).filter((g): g is NonNullable<typeof g> => g !== null && g !== undefined);
+  // Map dummy IDs to golfers with live scores
+  const teamGolfers = allGolferIds.map((dummyId) => {
+    // Get golfer info from dummy data (for name and bucket)
+    const dummyGolfer = allGolfers.find((g) => g.id === dummyId);
+    if (!dummyGolfer) return null;
+    
+    // Try to find live data by matching name
+    const liveGolfer = scoresData?.golfers?.find(
+      (g) => g.name === dummyGolfer.name || g.name.includes(dummyGolfer.name)
+    );
+    
+    // If we have live data, use it; otherwise create a pre-tournament golfer object
+    if (liveGolfer) {
+      return liveGolfer;
+    }
+    
+    // Pre-tournament: create golfer with E score
+    return {
+      id: dummyGolfer.id,
+      name: dummyGolfer.name,
+      world_rank: dummyGolfer.world_rank,
+      bucket: dummyGolfer.bucket,
+      live_score: 0,
+      thru_hole: null,
+      today_score: 0,
+      status: 'active' as const,
+    } as Golfer;
+  }).filter((g): g is NonNullable<typeof g> => g !== null);
   
   // Determine best 4 (with defensive checks)
   const bestFourIds = new Set(
@@ -143,18 +181,19 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
                         )}
                       </div>
                       <p className="text-xs text-stone-400">
-                        Rank #{golfer.world_rank}
-                        {tournamentStarted && golfer.status === 'cut' && ' • CUT'}
-                        {tournamentStarted && golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
+                        {getRoundStatus(golfer, scoresData?.tournament?.current_round || 1, tournamentStarted)}
+                        {golfer.status === 'cut' && ' • CUT'}
                       </p>
                     </div>
-                    <p className={`text-lg font-bold tabular-nums ${
-                      tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                      tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
-                    }`}>
-                      {tournamentStarted ? formatScore(golfer.live_score) : '--'}
-                      {tournamentStarted && golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
-                    </p>
+                    <div className="text-right">
+                      <p className={`text-lg font-bold tabular-nums ${
+                        (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
+                        (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
+                      }`}>
+                        {formatScore(golfer.live_score)}
+                        {golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
@@ -190,18 +229,19 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
                         )}
                       </div>
                       <p className="text-xs text-stone-400">
-                        Rank #{golfer.world_rank}
-                        {tournamentStarted && golfer.status === 'cut' && ' • CUT'}
-                        {tournamentStarted && golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
+                        {getRoundStatus(golfer, scoresData?.tournament?.current_round || 1, tournamentStarted)}
+                        {golfer.status === 'cut' && ' • CUT'}
                       </p>
                     </div>
-                    <p className={`text-lg font-bold tabular-nums ${
-                      tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                      tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
-                    }`}>
-                      {tournamentStarted ? formatScore(golfer.live_score) : '--'}
-                      {tournamentStarted && golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
-                    </p>
+                    <div className="text-right">
+                      <p className={`text-lg font-bold tabular-nums ${
+                        (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
+                        (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
+                      }`}>
+                        {formatScore(golfer.live_score)}
+                        {golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
@@ -237,18 +277,19 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
                         )}
                       </div>
                       <p className="text-xs text-stone-400">
-                        Rank #{golfer.world_rank}
-                        {tournamentStarted && golfer.status === 'cut' && ' • CUT'}
-                        {tournamentStarted && golfer.thru_hole !== null && ` • ${golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}`}
+                        {getRoundStatus(golfer, scoresData?.tournament?.current_round || 1, tournamentStarted)}
+                        {golfer.status === 'cut' && ' • CUT'}
                       </p>
                     </div>
-                    <p className={`text-lg font-bold tabular-nums ${
-                      tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                      tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
-                    }`}>
-                      {tournamentStarted ? formatScore(golfer.live_score) : '--'}
-                      {tournamentStarted && golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
-                    </p>
+                    <div className="text-right">
+                      <p className={`text-lg font-bold tabular-nums ${
+                        (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
+                        (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
+                      }`}>
+                        {formatScore(golfer.live_score)}
+                        {golfer.status === 'cut' && <span className="text-xs ml-1">×2</span>}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
