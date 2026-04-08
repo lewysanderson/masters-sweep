@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { scoreCache } from '@/lib/score-cache';
 import { mapESPNToGolfer, getTournamentInfo } from '@/lib/espn-api';
 import { allGolfers } from '@/lib/dummy-data';
+import { Golfer } from '@/types/database';
 
 export async function GET(request: Request) {
   try {
@@ -15,15 +16,50 @@ export async function GET(request: Request) {
       );
     }
     
-    // Map ESPN data to our Golfer format
+    // Build a name -> ESPN competitor map
     const competitors = data.events[0]?.competitions[0]?.competitors || [];
-    const updatedGolfers = competitors.map((comp) => {
-      // Find golfer in our data to get bucket assignment
-      const existingGolfer = allGolfers.find(
-        (g) => g.name === comp.athlete.displayName || g.name.includes(comp.athlete.displayName)
-      );
-      const bucket = existingGolfer?.bucket || 'wildcard';
-      return mapESPNToGolfer(comp, bucket);
+    const espnByName = new Map<string, any>();
+    competitors.forEach((comp) => {
+      espnByName.set(comp.athlete.displayName.toLowerCase(), comp);
+    });
+    
+    // Map our golfers to include ESPN live data, keyed by OUR dummy IDs
+    const updatedGolfers: Golfer[] = allGolfers.map((dummyGolfer) => {
+      // Try exact match first, then partial
+      const nameLower = dummyGolfer.name.toLowerCase();
+      let comp = espnByName.get(nameLower);
+      
+      if (!comp) {
+        // Try last name matching
+        const lastName = dummyGolfer.name.split(' ').pop()?.toLowerCase() || '';
+        for (const [espnName, espnComp] of espnByName) {
+          if (espnName.endsWith(lastName) && espnName.includes(dummyGolfer.name.split(' ')[0].toLowerCase())) {
+            comp = espnComp;
+            break;
+          }
+        }
+      }
+      
+      if (comp) {
+        const mapped = mapESPNToGolfer(comp, dummyGolfer.bucket);
+        // CRITICAL: Override ID with our dummy ID so entrant team lookups work
+        return {
+          ...mapped,
+          id: dummyGolfer.id,
+          bucket: dummyGolfer.bucket,
+        };
+      }
+      
+      // No ESPN data yet - return pre-tournament golfer
+      return {
+        ...dummyGolfer,
+        live_score: null,
+        thru_hole: null,
+        today_score: null,
+        round_scores: [],
+        status: 'active' as const,
+        on_course: false,
+      };
     });
     
     return NextResponse.json(

@@ -12,15 +12,16 @@ export interface ScoresData {
 
 export interface LeaderboardData {
   leaderboard: LeaderboardEntry[];
+  tournament?: TournamentInfo;
   timestamp: number;
 }
 
 export function useLiveScores() {
   return useSWR<ScoresData>('/api/scores', fetcher, {
-    refreshInterval: 60000,        // Poll every 60s
-    dedupingInterval: 2000,        // Prevent duplicate requests
-    revalidateOnFocus: false,      // Don't refetch on tab focus
-    revalidateOnReconnect: true,   // Refetch if internet reconnects
+    refreshInterval: 60000,
+    dedupingInterval: 2000,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: true,
   });
 }
 
@@ -33,7 +34,6 @@ export function useLiveLeaderboard() {
   });
 }
 
-// Helper to format last updated time
 export function formatLastUpdated(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
   if (seconds < 60) return `${seconds}s ago`;

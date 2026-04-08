@@ -1,27 +1,56 @@
 import { NextResponse } from 'next/server';
 import { scoreCache } from '@/lib/score-cache';
-import { mapESPNToGolfer } from '@/lib/espn-api';
+import { mapESPNToGolfer, getTournamentInfo } from '@/lib/espn-api';
 import { ENTRANTS } from '@/lib/entrants-config';
 import { allGolfers } from '@/lib/dummy-data';
-import { LeaderboardEntry, Golfer } from '@/types/database';
+import { LeaderboardEntry, Golfer, TournamentInfo } from '@/types/database';
 
 export async function GET(request: Request) {
   try {
     const data = await scoreCache.getData();
+    const tournamentInfo = getTournamentInfo(data);
     
-    // Map ESPN data to golfers
+    // Build a name -> ESPN competitor map
     const competitors = data.events[0]?.competitions[0]?.competitors || [];
-    const espnGolfersMap = new Map<number, Golfer>();
-    
+    const espnByName = new Map<string, any>();
     competitors.forEach((comp) => {
-      const existingGolfer = allGolfers.find(
-        (g) => g.name === comp.athlete.displayName || g.name.includes(comp.athlete.displayName)
-      );
-      if (existingGolfer) {
-        const updatedGolfer = mapESPNToGolfer(comp, existingGolfer.bucket);
-        espnGolfersMap.set(existingGolfer.id, updatedGolfer);
+      espnByName.set(comp.athlete.displayName.toLowerCase(), comp);
+    });
+    
+    // Build a map from our dummy ID -> Golfer with live data
+    const golferMap = new Map<number, Golfer>();
+    allGolfers.forEach((dummyGolfer) => {
+      const nameLower = dummyGolfer.name.toLowerCase();
+      let comp = espnByName.get(nameLower);
+      
+      if (!comp) {
+        const lastName = dummyGolfer.name.split(' ').pop()?.toLowerCase() || '';
+        for (const [espnName, espnComp] of espnByName) {
+          if (espnName.endsWith(lastName) && espnName.includes(dummyGolfer.name.split(' ')[0].toLowerCase())) {
+            comp = espnComp;
+            break;
+          }
+        }
+      }
+      
+      if (comp) {
+        const mapped = mapESPNToGolfer(comp, dummyGolfer.bucket);
+        golferMap.set(dummyGolfer.id, { ...mapped, id: dummyGolfer.id, bucket: dummyGolfer.bucket });
+      } else {
+        // Pre-tournament fallback - no live score
+        golferMap.set(dummyGolfer.id, {
+          ...dummyGolfer,
+          live_score: null,
+          thru_hole: null,
+          today_score: null,
+          round_scores: [],
+          status: 'active' as const,
+          on_course: false,
+        });
       }
     });
+    
+    const isPre = !tournamentInfo || tournamentInfo.status === 'pre';
     
     // Build leaderboard
     const leaderboard: LeaderboardEntry[] = ENTRANTS.map((entrant) => {
@@ -31,20 +60,19 @@ export async function GET(request: Request) {
         ...entrant.team.wildcard,
       ];
       
-      // Get golfers with live scores only (no dummy data fallback)
       const entrantGolfers = allGolferIds
-        .map((id) => espnGolfersMap.get(id))
-        .filter((g): g is Golfer => g !== null && g !== undefined);
+        .map((id) => golferMap.get(id))
+        .filter((g): g is Golfer => g !== undefined);
       
       // Calculate best 4 scores
-      const { total, bestFour } = calculateScore(entrantGolfers);
+      const { total, bestFour } = calculateScore(entrantGolfers, isPre);
       
       return {
         entrant,
         total_score: total,
         best_four_golfers: bestFour,
         all_golfers: entrantGolfers,
-        rank: 0, // Will be assigned after sorting
+        rank: 0,
       };
     });
     
@@ -52,8 +80,6 @@ export async function GET(request: Request) {
     leaderboard.sort((a, b) => a.total_score - b.total_score);
     leaderboard.forEach((entry, index) => {
       entry.rank = index + 1;
-      
-      // Assign prize positions
       if (index === 0) entry.prize_position = 1;
       else if (index === 1) entry.prize_position = 2;
       else if (index === 2) entry.prize_position = 3;
@@ -62,6 +88,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         leaderboard,
+        tournament: tournamentInfo,
         timestamp: Date.now(),
       },
       {
@@ -79,8 +106,11 @@ export async function GET(request: Request) {
   }
 }
 
-// Calculate best 4 scores (same logic as dummy-data.ts)
-function calculateScore(golfers: Golfer[]): { total: number; bestFour: Golfer[] } {
+function calculateScore(golfers: Golfer[], isPre: boolean): { total: number; bestFour: Golfer[] } {
+  if (isPre || golfers.length === 0) {
+    return { total: 0, bestFour: golfers.slice(0, 4) };
+  }
+  
   const scored = golfers.map((g) => ({
     golfer: g,
     effectiveScore: g.status === 'cut' ? (g.live_score ?? 0) * 2 : (g.live_score ?? 0),

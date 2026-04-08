@@ -3,8 +3,9 @@
 import { useState, useMemo } from 'react';
 import MobileShell from '@/components/MobileShell';
 import { useLiveScores, formatLastUpdated } from '@/lib/hooks/use-live-scores';
-import { GolferBucket } from '@/types/database';
-import { Search } from 'lucide-react';
+import { ENTRANTS } from '@/lib/entrants-config';
+import { GolferBucket, Golfer } from '@/types/database';
+import { Search, ArrowUpDown } from 'lucide-react';
 
 const FILTERS: Array<{ key: GolferBucket | 'all'; label: string }> = [
   { key: 'all', label: 'All' },
@@ -14,26 +15,36 @@ const FILTERS: Array<{ key: GolferBucket | 'all'; label: string }> = [
 ];
 
 function formatScore(score: number | null): string {
-  if (score === null) return '--';
+  if (score === null) return '-';
   if (score === 0) return 'E';
   return score > 0 ? `+${score}` : `${score}`;
 }
 
-const bucketStyles: Record<GolferBucket, { bg: string; text: string }> = {
-  top12: { bg: 'bg-amber-50', text: 'text-amber-700' },
-  mid: { bg: 'bg-blue-50', text: 'text-blue-700' },
-  wildcard: { bg: 'bg-purple-50', text: 'text-purple-700' },
+const bucketStyles: Record<GolferBucket, { bg: string; text: string; label: string }> = {
+  top12: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'T12' },
+  mid: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'MID' },
+  wildcard: { bg: 'bg-purple-50', text: 'text-purple-700', label: 'WC' },
 };
 
 export default function PlayersPage() {
   const { data, isLoading, isValidating } = useLiveScores();
   const [filter, setFilter] = useState<GolferBucket | 'all'>('all');
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState<'rank' | 'score'>('rank');
-  
-  // Check tournament status
-  const tournamentStatus = data?.tournament?.status || 'pre';
-  const tournamentStarted = tournamentStatus === 'in' || tournamentStatus === 'post';
+  const [sortBy, setSortBy] = useState<'rank' | 'score' | 'picks'>('rank');
+
+  const isPre = !data?.tournament || data.tournament.status === 'pre';
+  const currentRound = data?.tournament?.current_round || 1;
+
+  // Build pick count map
+  const pickCounts = useMemo(() => {
+    const counts = new Map<number, number>();
+    ENTRANTS.forEach(entrant => {
+      [...entrant.team.top12, ...entrant.team.mid, ...entrant.team.wildcard].forEach(id => {
+        counts.set(id, (counts.get(id) || 0) + 1);
+      });
+    });
+    return counts;
+  }, []);
 
   const golfers = useMemo(() => {
     if (!data?.golfers) return [];
@@ -43,131 +54,147 @@ export default function PlayersPage() {
       const q = search.toLowerCase();
       list = list.filter(g => g.name.toLowerCase().includes(q));
     }
-    if (sortBy === 'score') {
+    if (sortBy === 'score' && !isPre) {
       list = [...list].sort((a, b) => (a.live_score ?? 999) - (b.live_score ?? 999));
+    } else if (sortBy === 'picks') {
+      list = [...list].sort((a, b) => (pickCounts.get(b.id) || 0) - (pickCounts.get(a.id) || 0));
     } else {
       list = [...list].sort((a, b) => a.world_rank - b.world_rank);
     }
     return list;
-  }, [data?.golfers, filter, search, sortBy]);
+  }, [data?.golfers, filter, search, sortBy, isPre, pickCounts]);
 
   return (
     <MobileShell>
-      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
+      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-6 mb-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
               Tournament Field
             </div>
             <h1 className="text-3xl font-serif font-bold text-white">Players</h1>
-            <p className="text-white/70 text-sm mt-2">
-              {data ? `${data.golfers.length} Competitors` : 'Loading...'}
+            <p className="text-white/60 text-sm mt-1">
+              {data ? `${data.golfers.length} competitors` : 'Loading...'}
             </p>
           </div>
-          {data?.timestamp && (
+          {data?.timestamp && !isPre && (
             <div className="text-right">
-              <p className="text-xs text-white/70">{formatLastUpdated(data.timestamp)}</p>
-              {isValidating && <p className="text-xs text-white/90 animate-pulse mt-1">Updating...</p>}
+              <p className="text-xs text-white/60">{formatLastUpdated(data.timestamp)}</p>
+              {isValidating && <p className="text-xs text-white/80 animate-pulse mt-1">Updating...</p>}
             </div>
           )}
         </div>
       </div>
 
-      <div className="px-5 pt-4 space-y-3">
+      <div className="px-5 space-y-3">
         {/* Search */}
         <div className="relative">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
-            className="input pl-10"
+            className="input pl-10 text-sm"
             placeholder="Search players..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
         {/* Filters */}
-        <div className="flex gap-2">
-          {FILTERS.map(f => (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {FILTERS.map(({ key, label }) => (
             <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                filter === f.key
-                  ? 'bg-[var(--masters-green)] text-white'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full transition-colors whitespace-nowrap ${
+                filter === key ? 'bg-[var(--masters-green)] text-white' : 'bg-stone-100 text-stone-500'
               }`}
             >
-              {f.label}
+              {label}
             </button>
           ))}
-          <div className="flex-1" />
+          <div className="w-px bg-stone-200 mx-1" />
           <button
-            onClick={() => setSortBy(sortBy === 'rank' ? 'score' : 'rank')}
-            className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200"
+            onClick={() => setSortBy(sortBy === 'rank' ? (isPre ? 'picks' : 'score') : sortBy === 'score' ? 'picks' : 'rank')}
+            className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-stone-100 text-stone-500 flex items-center gap-1 whitespace-nowrap"
           >
-            {sortBy === 'rank' ? 'By Rank' : 'By Score'}
+            <ArrowUpDown size={12} />
+            {sortBy === 'rank' ? 'Rank' : sortBy === 'score' ? 'Score' : 'Picks'}
           </button>
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center py-8">
-            <p className="text-stone-400">Loading players...</p>
+        {/* Player list */}
+        <div className="space-y-1.5 pb-4">
+          {/* Table header */}
+          <div className="flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="w-7 text-right">#</span>
+            <span className="flex-1">Player</span>
+            <span className="w-10 text-center">Picks</span>
+            {!isPre && <span className="w-12 text-right">Score</span>}
+            {!isPre && <span className="w-14 text-right">Status</span>}
           </div>
-        )}
 
-        {/* Players List */}
-        <div className="space-y-2">
-          {golfers.map(golfer => {
+          {golfers.map((golfer) => {
             const bucket = bucketStyles[golfer.bucket];
+            const picks = pickCounts.get(golfer.id) || 0;
+            const isCut = golfer.status === 'cut';
+
+            let statusText = '';
+            if (!isPre) {
+              if (isCut) statusText = 'CUT';
+              else if (golfer.thru_hole === 18) statusText = 'F';
+              else if (golfer.thru_hole !== null) statusText = `${golfer.thru_hole}`;
+              else statusText = '-';
+            }
+
             return (
-              <div key={golfer.id} className="card p-3 flex items-center gap-3">
-                {/* On Course Indicator */}
-                {tournamentStarted && golfer.on_course && (
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
-                )}
-                
+              <div key={golfer.id} className={`flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white border border-stone-100 ${
+                isCut ? 'opacity-50' : ''
+              }`}>
                 {/* Rank */}
-                <div className="w-8 text-right">
-                  <span className="text-xs font-mono text-stone-400">#{golfer.world_rank}</span>
-                </div>
+                <span className="w-7 text-right text-xs font-mono text-stone-400">{golfer.world_rank}</span>
 
                 {/* Name & Bucket */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{golfer.name}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${bucket.bg} ${bucket.text}`}>
-                      {golfer.bucket === 'top12' ? 'TOP 12' : 
-                       golfer.bucket === 'mid' ? '13-50' : '51+'}
-                    </span>
-                    {tournamentStarted && golfer.status === 'cut' && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">
-                        CUT
-                      </span>
+                  <div className="flex items-center gap-1.5">
+                    {!isPre && golfer.on_course && (
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
                     )}
-                    {tournamentStarted && golfer.thru_hole !== null && (
-                      <span className="text-xs text-stone-400">
-                        {golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole}`}
-                      </span>
-                    )}
+                    <p className={`font-semibold text-sm truncate ${isCut ? 'line-through text-stone-400' : ''}`}>
+                      {golfer.name}
+                    </p>
                   </div>
+                  <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${bucket.bg} ${bucket.text}`}>
+                    {bucket.label}
+                  </span>
                 </div>
 
-                {/* Scores */}
-                <div className="text-right">
-                  <p className={`text-lg font-bold tabular-nums ${
-                    tournamentStarted && (golfer.live_score ?? 0) < 0 ? 'text-red-600' : 
-                    tournamentStarted && (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-600'
-                  }`}>
-                    {tournamentStarted ? formatScore(golfer.live_score) : '--'}
-                  </p>
-                  {tournamentStarted && golfer.today_score !== null && (
-                    <p className="text-xs text-stone-400 tabular-nums">
-                      R{data?.tournament.current_round || 1}: {formatScore(golfer.today_score)}
-                    </p>
-                  )}
+                {/* Pick count */}
+                <div className="w-10 text-center">
+                  <span className={`text-xs font-bold ${picks > 0 ? 'text-stone-600' : 'text-stone-300'}`}>
+                    {picks > 0 ? picks : '-'}
+                  </span>
                 </div>
+
+                {/* Score */}
+                {!isPre && (
+                  <div className="w-12 text-right">
+                    <span className={`text-sm font-bold tabular-nums ${
+                      (golfer.live_score ?? 0) < 0 ? 'text-red-600' :
+                      (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-500'
+                    }`}>
+                      {formatScore(golfer.live_score)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Status */}
+                {!isPre && (
+                  <div className="w-14 text-right">
+                    <span className={`text-xs ${isCut ? 'font-bold text-red-500' : 'text-stone-400'}`}>
+                      {statusText}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -175,11 +202,9 @@ export default function PlayersPage() {
 
         {golfers.length === 0 && !isLoading && (
           <div className="text-center py-8">
-            <p className="text-stone-400">No players found</p>
+            <p className="text-stone-400 text-sm">No players found</p>
           </div>
         )}
-
-        <div className="h-4" />
       </div>
     </MobileShell>
   );

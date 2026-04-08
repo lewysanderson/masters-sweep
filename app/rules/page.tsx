@@ -1,172 +1,125 @@
 'use client';
 
 import MobileShell from '@/components/MobileShell';
-import { PRIZE_SPLIT, BUCKET_REQUIREMENTS } from '@/types/database';
-import { getTotalPot, getPrizes, TOURNAMENT_CONFIG } from '@/lib/entrants-config';
-import { Trophy, Users, Calculator, Award } from 'lucide-react';
+import { ENTRANTS, getPrizes, getTotalPot, TOURNAMENT_CONFIG } from '@/lib/entrants-config';
 
 export default function RulesPage() {
   const prizes = getPrizes();
   const totalPot = getTotalPot();
-  
+
   return (
     <MobileShell>
-      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-8 mb-6">
+      {/* Header */}
+      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-6 mb-4">
         <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
-          Competition Format
+          How It Works
         </div>
         <h1 className="text-3xl font-serif font-bold text-white">Rules</h1>
-        <p className="text-white/70 text-sm mt-2">How the sweep works</p>
+        <p className="text-white/60 text-sm mt-1">The Masters 2026 Sweep</p>
       </div>
 
-      <div className="px-5 space-y-6">
-        {/* Overview */}
-        <div className="card-elevated">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--masters-gold-light)]">
-              <Trophy className="w-5 h-5 text-[var(--masters-gold)]" />
-            </div>
-            <h2 className="text-xl font-serif font-bold">Overview</h2>
-          </div>
-          <p className="text-stone-700 leading-relaxed">
-            Pick a team of 7 golfers from The Masters field. Your score is the combined total of your 
-            <strong className="text-[var(--masters-green)]"> best 4 golfers</strong>. Lowest score wins!
-          </p>
+      <div className="px-5 space-y-4 pb-6">
+        {/* Entry */}
+        <div className="card !p-4">
+          <h2 className="text-sm font-bold text-[var(--masters-green)] uppercase tracking-wider mb-3">Entry</h2>
+          <ul className="space-y-2 text-sm text-stone-700">
+            <li className="flex gap-2">
+              <span className="text-[var(--masters-gold)] font-bold">1.</span>
+              Entry fee is <strong>&pound;{TOURNAMENT_CONFIG.entry_fee}</strong> per person
+            </li>
+            <li className="flex gap-2">
+              <span className="text-[var(--masters-gold)] font-bold">2.</span>
+              {ENTRANTS.length} entrants = <strong>&pound;{totalPot}</strong> total prize pool
+            </li>
+          </ul>
         </div>
 
         {/* Team Selection */}
-        <div className="card-elevated">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--masters-green-lighter)]">
-              <Users className="w-5 h-5 text-[var(--masters-green)]" />
-            </div>
-            <h2 className="text-xl font-serif font-bold">Team Selection</h2>
-          </div>
-          <p className="text-stone-700 mb-5 font-medium">
-            You must pick exactly 7 golfers following these rules:
-          </p>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                {BUCKET_REQUIREMENTS.top12}
+        <div className="card !p-4">
+          <h2 className="text-sm font-bold text-[var(--masters-green)] uppercase tracking-wider mb-3">Team Selection</h2>
+          <p className="text-sm text-stone-600 mb-3">Each entrant selects <strong>7 golfers</strong> from three tiers:</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
+                <span className="text-xs font-bold text-white">2</span>
               </div>
               <div>
-                <p className="font-semibold text-sm">Top 12</p>
-                <p className="text-xs text-stone-500">World ranking 1-12</p>
+                <p className="font-bold text-sm text-amber-800">Top 12</p>
+                <p className="text-xs text-amber-600">World ranked 1-12</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                {BUCKET_REQUIREMENTS.mid}
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                <span className="text-xs font-bold text-white">3</span>
               </div>
               <div>
-                <p className="font-semibold text-sm">Mid Tier</p>
-                <p className="text-xs text-stone-500">World ranking 13-50</p>
+                <p className="font-bold text-sm text-blue-800">Mid Tier</p>
+                <p className="text-xs text-blue-600">World ranked 13-50</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                {BUCKET_REQUIREMENTS.wildcard}
+            <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                <span className="text-xs font-bold text-white">2</span>
               </div>
               <div>
-                <p className="font-semibold text-sm">Wildcards</p>
-                <p className="text-xs text-stone-500">World ranking 51+</p>
+                <p className="font-bold text-sm text-purple-800">Wildcard</p>
+                <p className="text-xs text-purple-600">World ranked 51+</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Scoring */}
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Calculator className="w-5 h-5 text-[var(--masters-green)]" />
-            <h2 className="text-lg font-bold">Scoring System</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-sm mb-2">Best 4 Count</h3>
-              <p className="text-sm text-stone-600">
-                Of your 7 golfers, only your <strong>best 4 scores</strong> count toward your total. 
-                This means 3 golfers act as backups in case someone plays poorly or misses the cut.
-              </p>
-            </div>
-            <div className="bg-stone-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-sm mb-2">Example</h3>
-              <div className="space-y-1 text-xs text-stone-600">
-                <div className="flex justify-between">
-                  <span>Golfer A: -8</span>
-                  <span className="text-emerald-600 font-bold">✓ Counts</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Golfer B: -5</span>
-                  <span className="text-emerald-600 font-bold">✓ Counts</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Golfer C: -3</span>
-                  <span className="text-emerald-600 font-bold">✓ Counts</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Golfer D: -2</span>
-                  <span className="text-emerald-600 font-bold">✓ Counts</span>
-                </div>
-                <div className="flex justify-between opacity-50">
-                  <span>Golfer E: +1</span>
-                  <span>✗ Doesn&apos;t count</span>
-                </div>
-                <div className="flex justify-between opacity-50">
-                  <span>Golfer F: +3</span>
-                  <span>✗ Doesn&apos;t count</span>
-                </div>
-                <div className="flex justify-between opacity-50">
-                  <span>Golfer G: +5</span>
-                  <span>✗ Doesn&apos;t count</span>
-                </div>
-                <div className="pt-2 mt-2 border-t border-stone-200 flex justify-between font-bold">
-                  <span>Your Total:</span>
-                  <span className="text-[var(--masters-green)]">-18</span>
-                </div>
-              </div>
-            </div>
-            <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
-              <h3 className="font-semibold text-sm mb-2 text-red-900">⚠️ Cut Penalty</h3>
-              <p className="text-sm text-red-800">
-                If a golfer misses the cut, their score is <strong>doubled</strong> (×2). 
-                Choose your wildcards wisely!
-              </p>
-            </div>
+        <div className="card !p-4">
+          <h2 className="text-sm font-bold text-[var(--masters-green)] uppercase tracking-wider mb-3">Scoring</h2>
+          <ul className="space-y-2 text-sm text-stone-700">
+            <li className="flex gap-2">
+              <span className="text-[var(--masters-gold)] font-bold">1.</span>
+              Your <strong>best 4 scores</strong> out of 7 golfers count
+            </li>
+            <li className="flex gap-2">
+              <span className="text-[var(--masters-gold)] font-bold">2.</span>
+              Scores are cumulative over all 4 rounds (total to par)
+            </li>
+            <li className="flex gap-2">
+              <span className="text-[var(--masters-gold)] font-bold">3.</span>
+              If a golfer <strong>misses the cut</strong>, their score is <strong>doubled</strong> as a penalty
+            </li>
+            <li className="flex gap-2">
+              <span className="text-[var(--masters-gold)] font-bold">4.</span>
+              <strong>Lowest combined score wins</strong>
+            </li>
+          </ul>
+        </div>
+
+        {/* Example */}
+        <div className="card !p-4 bg-stone-50">
+          <h2 className="text-sm font-bold text-stone-600 uppercase tracking-wider mb-3">Example</h2>
+          <div className="text-sm text-stone-600 space-y-1">
+            <p>If your 7 golfers finish at: <strong>-8, -5, -3, -1, +2, +4, CUT(+6)</strong></p>
+            <p className="text-xs text-stone-400 mt-2">Best 4 scores: -8, -5, -3, -1</p>
+            <p className="font-bold text-[var(--masters-green)]">Total: -8 + -5 + -3 + -1 = <strong>-17</strong></p>
+            <p className="text-xs text-stone-400 mt-1">The +2, +4, and CUT golfer are dropped</p>
           </div>
         </div>
 
         {/* Prizes */}
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Award className="w-5 h-5 text-[var(--masters-green)]" />
-            <h2 className="text-lg font-bold">Prize Breakdown</h2>
-          </div>
+        <div className="card !p-4">
+          <h2 className="text-sm font-bold text-[var(--masters-green)] uppercase tracking-wider mb-3">Prizes</h2>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-stone-600">🥇 First Place ({PRIZE_SPLIT.first * 100}%)</span>
-              <span className="text-xl font-bold text-[var(--masters-gold)]">£{prizes.first}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-stone-600">🥈 Second Place ({PRIZE_SPLIT.second * 100}%)</span>
-              <span className="text-lg font-bold text-stone-400">£{prizes.second}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-stone-600">🥉 Third Place ({PRIZE_SPLIT.third * 100}%)</span>
-              <span className="text-lg font-bold text-amber-700">£{prizes.third}</span>
-            </div>
-            <div className="pt-3 border-t border-stone-200 flex items-center justify-between">
-              <span className="font-semibold">Total Pot</span>
-              <span className="text-xl font-bold">£{totalPot}</span>
-            </div>
-            <p className="text-xs text-stone-500 text-center pt-2">
-              Entry fee: £{TOURNAMENT_CONFIG.entry_fee} per person
-            </p>
+            {[
+              { pos: '1st Place', pct: '70%', amount: prizes.first, color: 'bg-[var(--masters-gold)]' },
+              { pos: '2nd Place', pct: '20%', amount: prizes.second, color: 'bg-stone-400' },
+              { pos: '3rd Place', pct: '10%', amount: prizes.third, color: 'bg-amber-700' },
+            ].map(({ pos, pct, amount, color }) => (
+              <div key={pos} className="flex items-center gap-3">
+                <div className={`w-4 h-4 rounded-full ${color}`} />
+                <span className="flex-1 text-sm font-semibold text-stone-700">{pos} ({pct})</span>
+                <span className="text-lg font-bold text-stone-900">&pound;{amount}</span>
+              </div>
+            ))}
           </div>
         </div>
-
-        <div className="h-4" />
       </div>
     </MobileShell>
   );
