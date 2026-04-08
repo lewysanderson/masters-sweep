@@ -5,27 +5,21 @@ const config: Config = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
       colors: {
         masters: {
-          green: '#005f40',
-          'green-dark': '#004830',
-          'green-light': '#007050',
+          green: '#006747',
+          'green-dark': '#004d35',
+          'green-light': '#008055',
+          gold: '#c8a951',
+          'gold-light': '#e8d48b',
         },
-        stone: {
-          50: '#fafaf9',
-          100: '#f5f5f4',
-          200: '#e7e5e4',
-          300: '#d6d3d1',
-          400: '#a8a29e',
-          500: '#78716c',
-          600: '#57534e',
-          700: '#44403c',
-          800: '#292524',
-          900: '#1c1917',
-        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

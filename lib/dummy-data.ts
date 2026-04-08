@@ -1,181 +1,111 @@
-import { Golfer, Profile, Game, Participant, Selection } from '@/types/database';
+import { Golfer, GolferBucket } from '@/types/database';
 
-// Dummy Golfers - Top 10
-export const top10Golfers: Golfer[] = [
-  { id: 1, name: 'Scottie Scheffler', current_rank: 1, live_score: -8, thru_hole: 18, today_score: -3, status: 'active', odds_to_win: 4.5 },
-  { id: 2, name: 'Rory McIlroy', current_rank: 2, live_score: -6, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 8.0 },
-  { id: 3, name: 'Jon Rahm', current_rank: 3, live_score: -5, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 10.0 },
-  { id: 4, name: 'Viktor Hovland', current_rank: 4, live_score: -4, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 12.0 },
-  { id: 5, name: 'Brooks Koepka', current_rank: 5, live_score: -7, thru_hole: 18, today_score: -4, status: 'active', odds_to_win: 14.0 },
-  { id: 6, name: 'Xander Schauffele', current_rank: 6, live_score: -3, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 16.0 },
-  { id: 7, name: 'Patrick Cantlay', current_rank: 7, live_score: -2, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 18.0 },
-  { id: 8, name: 'Ludvig Aberg', current_rank: 8, live_score: -9, thru_hole: 18, today_score: -5, status: 'active', odds_to_win: 20.0 },
-  { id: 9, name: 'Collin Morikawa', current_rank: 9, live_score: -1, thru_hole: 18, today_score: 1, status: 'active', odds_to_win: 22.0 },
-  { id: 10, name: 'Tyrrell Hatton', current_rank: 10, live_score: -4, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 25.0 },
+// === GOLFERS FROM MASTERS 2026 FIELD ===
+// Top 12 (Bucket 1: Pick 2)
+const top12: Golfer[] = [
+  { id: 1, name: 'Scottie Scheffler', world_rank: 1, bucket: 'top12', live_score: -8, thru_hole: 18, today_score: -3, status: 'active' },
+  { id: 2, name: 'Jon Rahm', world_rank: 2, bucket: 'top12', live_score: -5, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 3, name: 'Bryson DeChambeau', world_rank: 3, bucket: 'top12', live_score: -10, thru_hole: 18, today_score: -6, status: 'active' },
+  { id: 4, name: 'Rory McIlroy', world_rank: 4, bucket: 'top12', live_score: -6, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 5, name: 'Ludvig Åberg', world_rank: 5, bucket: 'top12', live_score: -4, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 6, name: 'Xander Schauffele', world_rank: 6, bucket: 'top12', live_score: -7, thru_hole: 18, today_score: -4, status: 'active' },
+  { id: 7, name: 'Cameron Young', world_rank: 7, bucket: 'top12', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 8, name: 'Matt Fitzpatrick', world_rank: 8, bucket: 'top12', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 9, name: 'Tommy Fleetwood', world_rank: 9, bucket: 'top12', live_score: -3, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 10, name: 'Robert MacIntyre', world_rank: 10, bucket: 'top12', live_score: -4, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 11, name: 'Collin Morikawa', world_rank: 11, bucket: 'top12', live_score: -1, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 12, name: 'Justin Rose', world_rank: 12, bucket: 'top12', live_score: 2, thru_hole: 18, today_score: 4, status: 'cut' },
 ];
 
-// Dummy Golfers - Ranks 11-50
-export const mid40Golfers: Golfer[] = [
-  { id: 11, name: 'Max Homa', current_rank: 11, live_score: -3, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 28.0 },
-  { id: 12, name: 'Tommy Fleetwood', current_rank: 12, live_score: -2, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 30.0 },
-  { id: 13, name: 'Justin Thomas', current_rank: 13, live_score: -6, thru_hole: 18, today_score: -3, status: 'active', odds_to_win: 32.0 },
-  { id: 14, name: 'Cameron Smith', current_rank: 14, live_score: 0, thru_hole: 18, today_score: 2, status: 'active', odds_to_win: 35.0 },
-  { id: 15, name: 'Matt Fitzpatrick', current_rank: 15, live_score: -1, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 38.0 },
-  { id: 16, name: 'Jordan Spieth', current_rank: 16, live_score: -5, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 40.0 },
-  { id: 17, name: 'Tony Finau', current_rank: 17, live_score: -2, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 42.0 },
-  { id: 18, name: 'Sahith Theegala', current_rank: 18, live_score: -4, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 45.0 },
-  { id: 19, name: 'Russell Henley', current_rank: 19, live_score: 1, thru_hole: 18, today_score: 3, status: 'active', odds_to_win: 50.0 },
-  { id: 20, name: 'Sam Burns', current_rank: 20, live_score: -3, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 55.0 },
-  { id: 21, name: 'Hideki Matsuyama', current_rank: 21, live_score: -7, thru_hole: 18, today_score: -4, status: 'active', odds_to_win: 60.0 },
-  { id: 22, name: 'Rickie Fowler', current_rank: 22, live_score: -1, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 65.0 },
-  { id: 23, name: 'Jason Day', current_rank: 23, live_score: -2, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 70.0 },
-  { id: 24, name: 'Sungjae Im', current_rank: 24, live_score: 0, thru_hole: 18, today_score: 1, status: 'active', odds_to_win: 75.0 },
-  { id: 25, name: 'Bryson DeChambeau', current_rank: 25, live_score: -10, thru_hole: 18, today_score: -6, status: 'active', odds_to_win: 80.0 },
-  { id: 26, name: 'Shane Lowry', current_rank: 26, live_score: -1, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 85.0 },
-  { id: 27, name: 'Adam Scott', current_rank: 27, live_score: -3, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 90.0 },
-  { id: 28, name: 'Justin Rose', current_rank: 28, live_score: 2, thru_hole: 18, today_score: 4, status: 'cut', odds_to_win: 95.0 },
-  { id: 29, name: 'Min Woo Lee', current_rank: 29, live_score: -2, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 100.0 },
-  { id: 30, name: 'Sepp Straka', current_rank: 30, live_score: -4, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 110.0 },
-  { id: 31, name: 'Corey Conners', current_rank: 31, live_score: 0, thru_hole: 18, today_score: 1, status: 'active', odds_to_win: 120.0 },
-  { id: 32, name: 'Keegan Bradley', current_rank: 32, live_score: -1, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 130.0 },
-  { id: 33, name: 'Will Zalatoris', current_rank: 33, live_score: -3, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 140.0 },
-  { id: 34, name: 'Brian Harman', current_rank: 34, live_score: -5, thru_hole: 18, today_score: -3, status: 'active', odds_to_win: 150.0 },
-  { id: 35, name: 'Si Woo Kim', current_rank: 35, live_score: 1, thru_hole: 18, today_score: 2, status: 'active', odds_to_win: 160.0 },
-  { id: 36, name: 'Tom Kim', current_rank: 36, live_score: -2, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 170.0 },
-  { id: 37, name: 'Denny McCarthy', current_rank: 37, live_score: 0, thru_hole: 18, today_score: 1, status: 'active', odds_to_win: 180.0 },
-  { id: 38, name: 'Taylor Moore', current_rank: 38, live_score: -1, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 190.0 },
-  { id: 39, name: 'Eric Cole', current_rank: 39, live_score: -4, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 200.0 },
-  { id: 40, name: 'Akshay Bhatia', current_rank: 40, live_score: -6, thru_hole: 18, today_score: -3, status: 'active', odds_to_win: 220.0 },
+// Mid bucket (13-50, Pick 3)
+const midGolfers: Golfer[] = [
+  { id: 13, name: 'Patrick Reed', world_rank: 13, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 14, name: 'Hideki Matsuyama', world_rank: 14, bucket: 'mid', live_score: -7, thru_hole: 18, today_score: -4, status: 'active' },
+  { id: 15, name: 'Min Woo Lee', world_rank: 15, bucket: 'mid', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 16, name: 'Jordan Spieth', world_rank: 16, bucket: 'mid', live_score: -5, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 17, name: 'Brooks Koepka', world_rank: 17, bucket: 'mid', live_score: -3, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 18, name: 'Chris Gotterup', world_rank: 18, bucket: 'mid', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 19, name: 'Viktor Hovland', world_rank: 19, bucket: 'mid', live_score: -4, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 20, name: 'Shane Lowry', world_rank: 20, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 21, name: 'Si Woo Kim', world_rank: 21, bucket: 'mid', live_score: 1, thru_hole: 18, today_score: 2, status: 'active' },
+  { id: 22, name: 'Russell Henley', world_rank: 22, bucket: 'mid', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 23, name: 'Akshay Bhatia', world_rank: 23, bucket: 'mid', live_score: -6, thru_hole: 18, today_score: -3, status: 'active' },
+  { id: 24, name: 'Jacob Bridgeman', world_rank: 24, bucket: 'mid', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 25, name: 'Patrick Cantlay', world_rank: 25, bucket: 'mid', live_score: -3, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 26, name: 'Nicolai Højgaard', world_rank: 26, bucket: 'mid', live_score: -2, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 27, name: 'Jake Knapp', world_rank: 27, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 28, name: 'Tyrrell Hatton', world_rank: 28, bucket: 'mid', live_score: -4, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 29, name: 'Sepp Straka', world_rank: 29, bucket: 'mid', live_score: -3, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 30, name: 'J.J. Spaun', world_rank: 30, bucket: 'mid', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 31, name: 'Justin Thomas', world_rank: 31, bucket: 'mid', live_score: -5, thru_hole: 18, today_score: -3, status: 'active' },
+  { id: 32, name: 'Adam Scott', world_rank: 32, bucket: 'mid', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 33, name: 'Corey Conners', world_rank: 33, bucket: 'mid', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 34, name: 'Marco Penge', world_rank: 34, bucket: 'mid', live_score: 1, thru_hole: 18, today_score: 2, status: 'active' },
+  { id: 35, name: 'Cameron Smith', world_rank: 35, bucket: 'mid', live_score: -3, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 36, name: 'Jason Day', world_rank: 36, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 37, name: 'Maverick McNealy', world_rank: 37, bucket: 'mid', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 38, name: 'Sungjae Im', world_rank: 38, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 39, name: 'Gary Woodland', world_rank: 39, bucket: 'mid', live_score: 2, thru_hole: 18, today_score: 3, status: 'active' },
+  { id: 40, name: 'Sam Burns', world_rank: 40, bucket: 'mid', live_score: -3, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 41, name: 'Harris English', world_rank: 41, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 42, name: 'Max Homa', world_rank: 42, bucket: 'mid', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 43, name: 'Brian Harman', world_rank: 43, bucket: 'mid', live_score: -4, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 44, name: 'Daniel Berger', world_rank: 44, bucket: 'mid', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 45, name: 'Rasmus Højgaard', world_rank: 45, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 46, name: 'Aaron Rai', world_rank: 46, bucket: 'mid', live_score: -3, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 47, name: 'Kurt Kitayama', world_rank: 47, bucket: 'mid', live_score: 1, thru_hole: 18, today_score: 2, status: 'cut' },
+  { id: 48, name: 'Ben Griffin', world_rank: 48, bucket: 'mid', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 49, name: 'Ryan Fox', world_rank: 49, bucket: 'mid', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 50, name: 'Casey Jarvis', world_rank: 50, bucket: 'mid', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
 ];
 
-// Dummy Golfers - Field (51+)
-export const fieldGolfers: Golfer[] = [
-  { id: 51, name: 'Tiger Woods', current_rank: 51, live_score: -12, thru_hole: 18, today_score: -7, status: 'active', odds_to_win: 250.0 },
-  { id: 52, name: 'Phil Mickelson', current_rank: 52, live_score: 3, thru_hole: 18, today_score: 5, status: 'cut', odds_to_win: 300.0 },
-  { id: 53, name: 'Dustin Johnson', current_rank: 53, live_score: -2, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 350.0 },
-  { id: 54, name: 'Sergio Garcia', current_rank: 54, live_score: 0, thru_hole: 18, today_score: 1, status: 'active', odds_to_win: 400.0 },
-  { id: 55, name: 'Patrick Reed', current_rank: 55, live_score: -1, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 450.0 },
-  { id: 56, name: 'Louis Oosthuizen', current_rank: 56, live_score: -3, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 500.0 },
-  { id: 57, name: 'Gary Woodland', current_rank: 57, live_score: 2, thru_hole: 18, today_score: 3, status: 'active', odds_to_win: 550.0 },
-  { id: 58, name: 'Bubba Watson', current_rank: 58, live_score: -4, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 600.0 },
-  { id: 59, name: 'Webb Simpson', current_rank: 59, live_score: 1, thru_hole: 18, today_score: 2, status: 'active', odds_to_win: 650.0 },
-  { id: 60, name: 'Zach Johnson', current_rank: 60, live_score: 0, thru_hole: 18, today_score: 1, status: 'active', odds_to_win: 700.0 },
-  { id: 61, name: 'Lucas Glover', current_rank: 61, live_score: -5, thru_hole: 18, today_score: -3, status: 'active', odds_to_win: 750.0 },
-  { id: 62, name: 'Cameron Young', current_rank: 62, live_score: -1, thru_hole: 18, today_score: 0, status: 'active', odds_to_win: 800.0 },
-  { id: 63, name: 'Harris English', current_rank: 63, live_score: -2, thru_hole: 18, today_score: -1, status: 'active', odds_to_win: 850.0 },
-  { id: 64, name: 'Billy Horschel', current_rank: 64, live_score: 0, thru_hole: 18, today_score: 1, status: 'active', odds_to_win: 900.0 },
-  { id: 65, name: 'Chris Kirk', current_rank: 65, live_score: -3, thru_hole: 18, today_score: -2, status: 'active', odds_to_win: 950.0 },
+// Wildcard bucket (51+, Pick 2)
+const wildcardGolfers: Golfer[] = [
+  { id: 51, name: 'Keegan Bradley', world_rank: 51, bucket: 'wildcard', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 52, name: 'Dustin Johnson', world_rank: 52, bucket: 'wildcard', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 53, name: 'Harry Hall', world_rank: 53, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 54, name: 'Alex Noren', world_rank: 54, bucket: 'wildcard', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 55, name: 'Ryan Gerard', world_rank: 55, bucket: 'wildcard', live_score: 1, thru_hole: 18, today_score: 2, status: 'active' },
+  { id: 56, name: 'Michael Kim', world_rank: 56, bucket: 'wildcard', live_score: -3, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 57, name: 'Nick Taylor', world_rank: 57, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 58, name: 'Sam Stevens', world_rank: 58, bucket: 'wildcard', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 59, name: 'Wyndham Clark', world_rank: 59, bucket: 'wildcard', live_score: -4, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 60, name: 'Haotong Li', world_rank: 60, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 61, name: 'Carlos Ortiz', world_rank: 61, bucket: 'wildcard', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 62, name: 'Sami Valimaki', world_rank: 62, bucket: 'wildcard', live_score: 2, thru_hole: 18, today_score: 3, status: 'cut' },
+  { id: 63, name: 'Max Greyserman', world_rank: 63, bucket: 'wildcard', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 64, name: 'Sergio Garcia', world_rank: 64, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 65, name: 'Aldrich Potgieter', world_rank: 65, bucket: 'wildcard', live_score: -3, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 66, name: 'Rasmus Neergaard-Petersen', world_rank: 66, bucket: 'wildcard', live_score: 1, thru_hole: 18, today_score: 2, status: 'active' },
+  { id: 67, name: 'Nicolas Echavarria', world_rank: 67, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 68, name: 'Andrew Novak', world_rank: 68, bucket: 'wildcard', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 69, name: 'Matt McCarty', world_rank: 69, bucket: 'wildcard', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 70, name: 'Tom McKibbin', world_rank: 70, bucket: 'wildcard', live_score: -5, thru_hole: 18, today_score: -3, status: 'active' },
+  { id: 71, name: 'Michael Brennan', world_rank: 71, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 72, name: 'Kristoffer Reitan', world_rank: 72, bucket: 'wildcard', live_score: 1, thru_hole: 18, today_score: 2, status: 'active' },
+  { id: 73, name: 'John Keefer', world_rank: 73, bucket: 'wildcard', live_score: 3, thru_hole: 18, today_score: 4, status: 'cut' },
+  { id: 74, name: 'Bubba Watson', world_rank: 74, bucket: 'wildcard', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 75, name: 'Charl Schwartzel', world_rank: 75, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 76, name: 'Zach Johnson', world_rank: 76, bucket: 'wildcard', live_score: 2, thru_hole: 18, today_score: 3, status: 'active' },
+  { id: 77, name: 'Davis Riley', world_rank: 77, bucket: 'wildcard', live_score: -2, thru_hole: 18, today_score: -1, status: 'active' },
+  { id: 78, name: 'Fifa Laopakdee', world_rank: 78, bucket: 'wildcard', live_score: 1, thru_hole: 18, today_score: 2, status: 'active' },
+  { id: 79, name: 'Naoyuki Kataoka', world_rank: 79, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 80, name: 'Danny Willett', world_rank: 80, bucket: 'wildcard', live_score: -3, thru_hole: 18, today_score: -2, status: 'active' },
+  { id: 81, name: 'Ethan Fang', world_rank: 81, bucket: 'wildcard', live_score: 2, thru_hole: 18, today_score: 3, status: 'active' },
+  { id: 82, name: 'Jose Maria Olazabal', world_rank: 82, bucket: 'wildcard', live_score: 4, thru_hole: 18, today_score: 5, status: 'cut' },
+  { id: 83, name: 'Brandon Holtz', world_rank: 83, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 84, name: 'Mateo Pulcini', world_rank: 84, bucket: 'wildcard', live_score: 1, thru_hole: 18, today_score: 2, status: 'active' },
+  { id: 85, name: 'Mason Howell', world_rank: 85, bucket: 'wildcard', live_score: -1, thru_hole: 18, today_score: 0, status: 'active' },
+  { id: 86, name: 'Jackson Herrington', world_rank: 86, bucket: 'wildcard', live_score: 0, thru_hole: 18, today_score: 1, status: 'active' },
+  { id: 87, name: 'Brian Campbell', world_rank: 87, bucket: 'wildcard', live_score: 3, thru_hole: 18, today_score: 4, status: 'cut' },
+  { id: 88, name: 'Vijay Singh', world_rank: 88, bucket: 'wildcard', live_score: 5, thru_hole: 18, today_score: 6, status: 'cut' },
+  { id: 89, name: 'Angel Cabrera', world_rank: 89, bucket: 'wildcard', live_score: 2, thru_hole: 18, today_score: 3, status: 'active' },
+  { id: 90, name: 'Mike Weir', world_rank: 90, bucket: 'wildcard', live_score: 4, thru_hole: 18, today_score: 5, status: 'cut' },
+  { id: 91, name: 'Fred Couples', world_rank: 91, bucket: 'wildcard', live_score: 3, thru_hole: 18, today_score: 4, status: 'cut' },
 ];
 
-export const allGolfers: Golfer[] = [...top10Golfers, ...mid40Golfers, ...fieldGolfers];
+export const allGolfers: Golfer[] = [...top12, ...midGolfers, ...wildcardGolfers];
 
-// Dummy Users
-export const dummyUsers: Profile[] = [
-  { id: 'user-1', email: 'john@example.com', display_name: 'John Smith', created_at: new Date().toISOString() },
-  { id: 'user-2', email: 'sarah@example.com', display_name: 'Sarah Johnson', created_at: new Date().toISOString() },
-  { id: 'user-3', email: 'mike@example.com', display_name: 'Mike Davis', created_at: new Date().toISOString() },
-  { id: 'user-4', email: 'emily@example.com', display_name: 'Emily Wilson', created_at: new Date().toISOString() },
-  { id: 'user-5', email: 'dave@example.com', display_name: 'Dave Anderson', created_at: new Date().toISOString() },
-  { id: 'user-6', email: 'lisa@example.com', display_name: 'Lisa Brown', created_at: new Date().toISOString() },
-];
-
-// Dummy Game
-export const dummyGame: Game = {
-  id: 'game-1',
-  admin_id: 'user-1',
-  name: 'The April Major 2025',
-  entry_code: 'GOLF25',
-  is_locked: false,
-  theme_color: '#005f40',
-  entry_fee: 20,
-  payment_info: 'Venmo: @JohnSmith or Cash App: $JohnSmith',
-  created_at: new Date().toISOString(),
-};
-
-// Dummy Participants with selections
-export const dummyParticipants: Participant[] = [
-  {
-    id: 'part-1',
-    user_id: 'user-1',
-    game_id: 'game-1',
-    payment_status: 'verified',
-    user: dummyUsers[0],
-  },
-  {
-    id: 'part-2',
-    user_id: 'user-2',
-    game_id: 'game-1',
-    payment_status: 'verified',
-    user: dummyUsers[1],
-  },
-  {
-    id: 'part-3',
-    user_id: 'user-3',
-    game_id: 'game-1',
-    payment_status: 'pending',
-    user: dummyUsers[2],
-  },
-  {
-    id: 'part-4',
-    user_id: 'user-4',
-    game_id: 'game-1',
-    payment_status: 'verified',
-    user: dummyUsers[3],
-  },
-  {
-    id: 'part-5',
-    user_id: 'user-5',
-    game_id: 'game-1',
-    payment_status: 'unpaid',
-    user: dummyUsers[4],
-  },
-];
-
-// Dummy Selections - Each participant has 7 golfers (2 top10, 3 mid40, 2 field)
-export const dummySelections: Selection[] = [
-  // User 1 selections
-  { id: 'sel-1', participant_id: 'part-1', golfer_id: 1, golfer: top10Golfers[0] },
-  { id: 'sel-2', participant_id: 'part-1', golfer_id: 5, golfer: top10Golfers[4] },
-  { id: 'sel-3', participant_id: 'part-1', golfer_id: 13, golfer: mid40Golfers[2] },
-  { id: 'sel-4', participant_id: 'part-1', golfer_id: 21, golfer: mid40Golfers[10] },
-  { id: 'sel-5', participant_id: 'part-1', golfer_id: 25, golfer: mid40Golfers[14] },
-  { id: 'sel-6', participant_id: 'part-1', golfer_id: 51, golfer: fieldGolfers[0] },
-  { id: 'sel-7', participant_id: 'part-1', golfer_id: 58, golfer: fieldGolfers[7] },
-
-  // User 2 selections
-  { id: 'sel-8', participant_id: 'part-2', golfer_id: 8, golfer: top10Golfers[7] },
-  { id: 'sel-9', participant_id: 'part-2', golfer_id: 2, golfer: top10Golfers[1] },
-  { id: 'sel-10', participant_id: 'part-2', golfer_id: 16, golfer: mid40Golfers[5] },
-  { id: 'sel-11', participant_id: 'part-2', golfer_id: 18, golfer: mid40Golfers[7] },
-  { id: 'sel-12', participant_id: 'part-2', golfer_id: 34, golfer: mid40Golfers[23] },
-  { id: 'sel-13', participant_id: 'part-2', golfer_id: 61, golfer: fieldGolfers[10] },
-  { id: 'sel-14', participant_id: 'part-2', golfer_id: 53, golfer: fieldGolfers[2] },
-
-  // User 3 selections
-  { id: 'sel-15', participant_id: 'part-3', golfer_id: 3, golfer: top10Golfers[2] },
-  { id: 'sel-16', participant_id: 'part-3', golfer_id: 10, golfer: top10Golfers[9] },
-  { id: 'sel-17', participant_id: 'part-3', golfer_id: 11, golfer: mid40Golfers[0] },
-  { id: 'sel-18', participant_id: 'part-3', golfer_id: 20, golfer: mid40Golfers[9] },
-  { id: 'sel-19', participant_id: 'part-3', golfer_id: 40, golfer: mid40Golfers[29] },
-  { id: 'sel-20', participant_id: 'part-3', golfer_id: 55, golfer: fieldGolfers[4] },
-  { id: 'sel-21', participant_id: 'part-3', golfer_id: 65, golfer: fieldGolfers[14] },
-
-  // User 4 selections
-  { id: 'sel-22', participant_id: 'part-4', golfer_id: 4, golfer: top10Golfers[3] },
-  { id: 'sel-23', participant_id: 'part-4', golfer_id: 7, golfer: top10Golfers[6] },
-  { id: 'sel-24', participant_id: 'part-4', golfer_id: 12, golfer: mid40Golfers[1] },
-  { id: 'sel-25', participant_id: 'part-4', golfer_id: 15, golfer: mid40Golfers[4] },
-  { id: 'sel-26', participant_id: 'part-4', golfer_id: 27, golfer: mid40Golfers[16] },
-  { id: 'sel-27', participant_id: 'part-4', golfer_id: 56, golfer: fieldGolfers[5] },
-  { id: 'sel-28', participant_id: 'part-4', golfer_id: 62, golfer: fieldGolfers[11] },
-];
-
-// Add selections to participants
-dummyParticipants[0].selections = dummySelections.slice(0, 7);
-dummyParticipants[1].selections = dummySelections.slice(7, 14);
-dummyParticipants[2].selections = dummySelections.slice(14, 21);
-dummyParticipants[3].selections = dummySelections.slice(21, 28);
-dummyParticipants[4].selections = [];
-
-// Current logged-in user (for demo)
-export const currentUser: Profile = dummyUsers[0];
+export function getGolfersByBucket(bucket: GolferBucket): Golfer[] {
+  return allGolfers.filter(g => g.bucket === bucket);
+}

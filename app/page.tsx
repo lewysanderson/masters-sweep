@@ -1,100 +1,187 @@
+'use client';
+
+import { useLiveScores, useLiveLeaderboard, formatLastUpdated } from '@/lib/hooks/use-live-scores';
+import { TOURNAMENT_CONFIG, getTotalPot, getPrizes, ENTRANTS } from '@/lib/entrants-config';
+import MobileShell from '@/components/MobileShell';
 import Link from 'next/link';
-import { Trophy, Users, Target, DollarSign } from 'lucide-react';
+import { Trophy, Users, Clock, Coins } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function HomePage() {
+  const { data: scoresData, isLoading, isValidating } = useLiveScores();
+  const { data: leaderboardData } = useLiveLeaderboard();
+  
+  const tournament = scoresData?.tournament;
+  const isPre = !tournament || tournament.status === 'pre';
+  const isLive = tournament?.status === 'in';
+  const isPost = tournament?.status === 'post';
+  
+  const prizes = getPrizes();
+  const totalPot = getTotalPot();
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-masters-green to-masters-green-dark">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
-            The April Major
+    <MobileShell>
+      <div className="p-4 space-y-6">
+        {/* Header */}
+        <div className="text-center py-6">
+          <h1 className="text-3xl font-bold text-[var(--masters-green)] mb-2">
+            {TOURNAMENT_CONFIG.name}
           </h1>
-          <p className="text-xl text-stone-100 mb-8">
-            Masters Golf Sweepstake - Pick Your Dream Team
+          <p className="text-stone-500 text-sm">
+            April 9-12, 2026 • Augusta National
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/games/create" className="btn-primary bg-white text-masters-green hover:bg-stone-100">
-              Create a Game
-            </Link>
-            <Link href="/games/join" className="btn-primary border-2 border-white bg-transparent hover:bg-white/10">
-              Join a Game
-            </Link>
-            <Link href="/dashboard" className="btn-secondary">
-              View Dashboard
-            </Link>
+        </div>
+
+        {/* Pre-tournament: Countdown */}
+        {isPre && (
+          <div className="card p-6 text-center space-y-4">
+            <Clock className="w-12 h-12 mx-auto text-[var(--masters-green)]" />
+            <div>
+              <h2 className="text-xl font-bold mb-2">Tournament Starts In</h2>
+              <p className="text-3xl font-bold text-[var(--masters-green)]">
+                {formatDistanceToNow(new Date(TOURNAMENT_CONFIG.startDate), { addSuffix: false })}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              <div>
+                <p className="text-2xl font-bold">{ENTRANTS.length}</p>
+                <p className="text-sm text-stone-500">Entrants</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">£{totalPot}</p>
+                <p className="text-sm text-stone-500">Total Pot</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Live Indicator */}
+        {isLive && scoresData && (
+          <div className="flex items-center justify-between bg-[var(--masters-green)] text-white px-4 py-3 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              <span className="font-semibold">LIVE</span>
+            </div>
+            <span className="text-sm opacity-90">
+              {scoresData.timestamp && `Updated ${formatLastUpdated(scoresData.timestamp)}`}
+            </span>
+            {isValidating && <span className="text-xs opacity-75">Updating...</span>}
+          </div>
+        )}
+
+        {/* Top 3 Sweep Leaders */}
+        {leaderboardData && leaderboardData.leaderboard.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Sweep Leaderboard</h2>
+              <Link href="/leaderboard" className="text-sm text-[var(--masters-green)] font-semibold">
+                View All →
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {leaderboardData.leaderboard.slice(0, 3).map((entry, idx) => (
+                <div key={entry.entrant.id} className="card p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`text-2xl ${idx === 0 ? 'text-[var(--masters-gold)]' : idx === 1 ? 'text-stone-400' : 'text-amber-700'}`}>
+                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{entry.entrant.name}</p>
+                      <p className="text-xs text-stone-500">
+                        Best 4: {entry.best_four_golfers.map(g => g.name.split(' ').pop()).join(', ')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold score-badge under-par">
+                      {entry.total_score > 0 ? '+' : ''}{entry.total_score}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tournament Leaders */}
+        {isLive && scoresData?.golfers && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold">Tournament Leaders</h2>
+            <div className="space-y-2">
+              {scoresData.golfers
+                .filter(g => g.live_score !== null)
+                .sort((a, b) => (a.live_score || 0) - (b.live_score || 0))
+                .slice(0, 5)
+                .map((golfer) => (
+                  <div key={golfer.id} className="card p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {golfer.on_course && (
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      )}
+                      <div>
+                        <p className="font-semibold text-sm">{golfer.name}</p>
+                        <p className="text-xs text-stone-500">
+                          {golfer.thru_hole === 18 ? 'F' : `Thru ${golfer.thru_hole || '-'}`}
+                        </p>
+                      </div>
+                    </div>
+                    <p className={`font-bold text-lg ${
+                      (golfer.live_score || 0) < 0 ? 'text-red-600' : 
+                      (golfer.live_score || 0) > 0 ? 'text-green-700' : 'text-stone-900'
+                    }`}>
+                      {golfer.live_score === 0 ? 'E' : 
+                       (golfer.live_score || 0) > 0 ? `+${golfer.live_score}` : 
+                       golfer.live_score}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Prize Breakdown */}
+        <div className="card p-6 space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Coins className="w-5 h-5 text-[var(--masters-gold)]" />
+            <h2 className="text-lg font-bold">Prize Breakdown</h2>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-stone-600">🥇 First Place (70%)</span>
+              <span className="text-xl font-bold text-[var(--masters-gold)]">£{prizes.first}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-stone-600">🥈 Second Place (20%)</span>
+              <span className="text-lg font-bold text-stone-400">£{prizes.second}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-stone-600">🥉 Third Place (10%)</span>
+              <span className="text-lg font-bold text-amber-700">£{prizes.third}</span>
+            </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          <div className="card bg-white/95">
-            <div className="flex justify-center mb-4">
-              <Trophy className="w-12 h-12 text-masters-green" />
-            </div>
-            <h3 className="text-lg font-bold text-center mb-2">Pick 7 Golfers</h3>
-            <p className="text-sm text-stone-600 text-center">
-              Select your team following the bucket rules: 2 from Top 10, 3 from 11-50, 2 from the Field
-            </p>
-          </div>
-
-          <div className="card bg-white/95">
-            <div className="flex justify-center mb-4">
-              <Target className="w-12 h-12 text-masters-green" />
-            </div>
-            <h3 className="text-lg font-bold text-center mb-2">Best 4 Win</h3>
-            <p className="text-sm text-stone-600 text-center">
-              Your score is the combined total of your best 4 golfers. Lowest score wins!
-            </p>
-          </div>
-
-          <div className="card bg-white/95">
-            <div className="flex justify-center mb-4">
-              <Users className="w-12 h-12 text-masters-green" />
-            </div>
-            <h3 className="text-lg font-bold text-center mb-2">Play with Friends</h3>
-            <p className="text-sm text-stone-600 text-center">
-              Create private games, invite friends with a code, and compete on your own leaderboard
-            </p>
-          </div>
-
-          <div className="card bg-white/95">
-            <div className="flex justify-center mb-4">
-              <DollarSign className="w-12 h-12 text-masters-green" />
-            </div>
-            <h3 className="text-lg font-bold text-center mb-2">Easy Entry Fees</h3>
-            <p className="text-sm text-stone-600 text-center">
-              Set custom entry fees and payment methods. Admin verifies payments manually
-            </p>
-          </div>
+        {/* Quick Links */}
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/entrants" className="card p-4 text-center hover:shadow-md transition-shadow">
+            <Users className="w-8 h-8 mx-auto mb-2 text-[var(--masters-green)]" />
+            <p className="font-semibold">View Entrants</p>
+            <p className="text-xs text-stone-500">{ENTRANTS.length} teams</p>
+          </Link>
+          <Link href="/rules" className="card p-4 text-center hover:shadow-md transition-shadow">
+            <Trophy className="w-8 h-8 mx-auto mb-2 text-[var(--masters-green)]" />
+            <p className="font-semibold">Rules</p>
+            <p className="text-xs text-stone-500">How to win</p>
+          </Link>
         </div>
 
-        <div className="mt-16 text-center">
-          <div className="card inline-block max-w-2xl bg-white/95">
-            <h2 className="text-2xl font-bold mb-4 text-masters-green">How It Works</h2>
-            <ol className="text-left space-y-3">
-              <li className="flex gap-3">
-                <span className="font-bold text-masters-green">1.</span>
-                <span>Create or join a game using a 6-character entry code</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-bold text-masters-green">2.</span>
-                <span>Select 7 golfers following the bucket requirements</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-bold text-masters-green">3.</span>
-                <span>Mark yourself as paid (admin will verify)</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-bold text-masters-green">4.</span>
-                <span>Watch the tournament and track the live leaderboard</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-bold text-masters-green">5.</span>
-                <span>Winner takes all based on best 4 golfers' combined score!</span>
-              </li>
-            </ol>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-8">
+            <p className="text-stone-400">Loading tournament data...</p>
           </div>
-        </div>
+        )}
       </div>
-    </div>
+    </MobileShell>
   );
 }
