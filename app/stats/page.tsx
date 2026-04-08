@@ -52,6 +52,7 @@ export default function StatsPage() {
   
   const [view, setView] = useState<'popularity' | 'value' | 'odds'>('popularity');
   const [showAll, setShowAll] = useState(false);
+  const [chartBucket, setChartBucket] = useState<'all' | 'top12' | 'mid' | 'wildcard'>('all');
   
   const sortedStats = data?.golfer_stats ? [...data.golfer_stats] : [];
   
@@ -218,49 +219,145 @@ export default function StatsPage() {
               </div>
             )}
 
-            {/* Bucket Distribution */}
-            <div className="card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Percent className="w-5 h-5 text-[var(--masters-green)]" />
-                <h2 className="text-lg font-bold">Pick Distribution</h2>
+            {/* Pick Distribution Bar Chart */}
+            <div className="card-elevated">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--masters-green-lighter)]">
+                  <BarChart3 className="w-5 h-5 text-[var(--masters-green)]" />
+                </div>
+                <h2 className="text-xl font-serif font-bold">Pick Distribution</h2>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-stone-600">Top 12</span>
-                    <span className="font-semibold">{data.aggregate_stats.top12_picks} picks</span>
-                  </div>
-                  <div className="w-full bg-stone-100 rounded-full h-2">
-                    <div 
-                      className="bg-amber-500 h-2 rounded-full transition-all"
-                      style={{ width: `${(data.aggregate_stats.top12_picks / data.aggregate_stats.total_picks) * 100}%` }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-stone-600">Mid Tier (13-50)</span>
-                    <span className="font-semibold">{data.aggregate_stats.mid_picks} picks</span>
-                  </div>
-                  <div className="w-full bg-stone-100 rounded-full h-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full transition-all"
-                      style={{ width: `${(data.aggregate_stats.mid_picks / data.aggregate_stats.total_picks) * 100}%` }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-stone-600">Wildcards (51+)</span>
-                    <span className="font-semibold">{data.aggregate_stats.wildcard_picks} picks</span>
-                  </div>
-                  <div className="w-full bg-stone-100 rounded-full h-2">
-                    <div 
-                      className="bg-purple-500 h-2 rounded-full transition-all"
-                      style={{ width: `${(data.aggregate_stats.wildcard_picks / data.aggregate_stats.total_picks) * 100}%` }}
-                    />
-                  </div>
-                </div>
+
+              {/* Bucket Tabs */}
+              <div className="flex gap-1 mb-4 bg-stone-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setChartBucket('all')}
+                  className={`flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded transition-all ${
+                    chartBucket === 'all'
+                      ? 'bg-white text-[var(--masters-green)] shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setChartBucket('top12')}
+                  className={`flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded transition-all ${
+                    chartBucket === 'top12'
+                      ? 'bg-white text-[var(--masters-green)] shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  Top 12
+                </button>
+                <button
+                  onClick={() => setChartBucket('mid')}
+                  className={`flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded transition-all ${
+                    chartBucket === 'mid'
+                      ? 'bg-white text-[var(--masters-green)] shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  13-50
+                </button>
+                <button
+                  onClick={() => setChartBucket('wildcard')}
+                  className={`flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded transition-all ${
+                    chartBucket === 'wildcard'
+                      ? 'bg-white text-[var(--masters-green)] shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  51+
+                </button>
+              </div>
+
+              {/* Bar Chart */}
+              <div className="relative">
+                {(() => {
+                  const filteredGolfers = chartBucket === 'all' 
+                    ? data.golfer_stats
+                    : data.golfer_stats.filter(g => g.bucket === chartBucket);
+                  
+                  const sortedGolfers = [...filteredGolfers].sort((a, b) => b.pick_count - a.pick_count);
+                  const maxPicks = Math.max(...sortedGolfers.map(g => g.pick_count), 1);
+                  
+                  return (
+                    <>
+                      {/* Y-axis labels */}
+                      <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-xs text-stone-400 font-mono pr-2">
+                        <span>{maxPicks}</span>
+                        <span>{Math.floor(maxPicks * 0.75)}</span>
+                        <span>{Math.floor(maxPicks * 0.5)}</span>
+                        <span>{Math.floor(maxPicks * 0.25)}</span>
+                        <span>0</span>
+                      </div>
+
+                      {/* Chart container */}
+                      <div className="ml-8 overflow-x-auto">
+                        <div className="flex items-end gap-1 min-w-max pb-2" style={{ height: '200px' }}>
+                          {sortedGolfers.map((golfer) => {
+                            const heightPercent = (golfer.pick_count / maxPicks) * 100;
+                            const barColor = 
+                              golfer.bucket === 'top12' ? 'bg-amber-500' :
+                              golfer.bucket === 'mid' ? 'bg-blue-500' :
+                              'bg-purple-500';
+                            
+                            return (
+                              <div key={golfer.golfer_id} className="flex flex-col items-center gap-1" style={{ width: '32px' }}>
+                                {/* Bar */}
+                                <div className="relative w-full flex items-end" style={{ height: '180px' }}>
+                                  <div 
+                                    className={`w-full ${barColor} rounded-t transition-all hover:opacity-80 cursor-pointer relative group`}
+                                    style={{ height: `${heightPercent}%` }}
+                                    title={`${golfer.golfer_name}: ${golfer.pick_count} picks`}
+                                  >
+                                    {/* Tooltip on hover */}
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
+                                      <div className="bg-stone-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        <p className="font-semibold">{golfer.golfer_name.split(' ').pop()}</p>
+                                        <p>{golfer.pick_count} picks</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* Player name (last name only, rotated) */}
+                                <div className="w-full flex justify-center" style={{ height: '60px' }}>
+                                  <p 
+                                    className="text-[8px] font-semibold text-stone-600 origin-bottom-left whitespace-nowrap"
+                                    style={{ 
+                                      transform: 'rotate(-45deg) translateX(-8px)',
+                                      width: '60px',
+                                      textAlign: 'left'
+                                    }}
+                                  >
+                                    {golfer.golfer_name.split(' ').pop()}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Legend */}
+                      <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-stone-200">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-amber-500 rounded"></div>
+                          <span className="text-xs text-stone-600">Top 12</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                          <span className="text-xs text-stone-600">13-50</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-purple-500 rounded"></div>
+                          <span className="text-xs text-stone-600">51+</span>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 
