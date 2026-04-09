@@ -1,7 +1,7 @@
 'use client';
 
 import MobileShell from '@/components/MobileShell';
-import { useLiveLeaderboard, formatLastUpdated } from '@/lib/hooks/use-live-scores';
+import { useLiveLeaderboard, formatLastUpdated, formatTimestamp } from '@/lib/hooks/use-live-scores';
 import { getPrizes, ENTRANTS } from '@/lib/entrants-config';
 import { Trophy, ChevronDown, ChevronUp, AlertTriangle, Clock } from 'lucide-react';
 import { useState } from 'react';
@@ -133,18 +133,17 @@ export default function LeaderboardPage() {
     <MobileShell>
       <div className="bg-[var(--masters-green)] px-6 pt-10 pb-4 border-b border-[var(--masters-gold)]">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Sweep Standings</p>
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-serif font-bold text-white">Leaderboard</h1>
-          {data?.timestamp && !isPre && (
-            <div className="flex items-center gap-2">
-              {isValidating && <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-pulse" />}
-              <p className="text-[10px] text-white/40">{formatLastUpdated(data.timestamp)}</p>
-            </div>
-          )}
-        </div>
+        <h1 className="text-xl font-serif font-bold text-white">Leaderboard</h1>
       </div>
 
       <div className="px-5 pt-4 space-y-3 pb-6">
+        {/* Last updated */}
+        {data?.timestamp && !isPre && (
+          <p className="text-[10px] text-stone-400 text-center">
+            Live scores as at {formatTimestamp(data.timestamp)}
+          </p>
+        )}
+
         {/* Pre-tournament message */}
         {isPre && (
           <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">

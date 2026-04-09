@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import MobileShell from '@/components/MobileShell';
-import { useLiveScores, formatLastUpdated } from '@/lib/hooks/use-live-scores';
+import { useLiveScores, formatLastUpdated, formatTimestamp } from '@/lib/hooks/use-live-scores';
 import { ENTRANTS } from '@/lib/entrants-config';
 import { GolferBucket, Golfer } from '@/types/database';
 import { Search, ArrowUpDown } from 'lucide-react';
@@ -70,18 +70,17 @@ export default function PlayersPage() {
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
           {data ? `${data.golfers.length} Competitors` : 'Tournament Field'}
         </p>
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-serif font-bold text-white">Players</h1>
-          {data?.timestamp && !isPre && (
-            <div className="flex items-center gap-2">
-              {isValidating && <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-pulse" />}
-              <p className="text-[10px] text-white/40">{formatLastUpdated(data.timestamp)}</p>
-            </div>
-          )}
-        </div>
+        <h1 className="text-xl font-serif font-bold text-white">Players</h1>
       </div>
 
       <div className="px-5 pt-4 space-y-3">
+        {/* Last updated */}
+        {data?.timestamp && !isPre && (
+          <p className="text-[10px] text-stone-400 text-center">
+            Live scores as at {formatTimestamp(data.timestamp)}
+          </p>
+        )}
+
         {/* Search */}
         <div className="relative">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />

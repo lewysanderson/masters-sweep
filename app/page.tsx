@@ -1,6 +1,6 @@
 'use client';
 
-import { useLiveScores, useLiveLeaderboard, formatLastUpdated } from '@/lib/hooks/use-live-scores';
+import { useLiveScores, useLiveLeaderboard, formatLastUpdated, formatTimestamp } from '@/lib/hooks/use-live-scores';
 import { TOURNAMENT_CONFIG, getTotalPot, getPrizes, ENTRANTS } from '@/lib/entrants-config';
 import MobileShell from '@/components/MobileShell';
 import Link from 'next/link';
@@ -107,6 +107,13 @@ export default function HomePage() {
       </div>
 
       <div className="px-5 pt-4 space-y-5 pb-6">
+
+        {/* Last updated timestamp */}
+        {scoresData?.timestamp && !isPre && (
+          <p className="text-[10px] text-stone-400 text-center -mb-2">
+            Live scores as at {formatTimestamp(scoresData.timestamp)}
+          </p>
+        )}
 
         {/* My Team(s) - favourited entrants */}
         {favsLoaded && favouriteEntrants.length > 0 && (

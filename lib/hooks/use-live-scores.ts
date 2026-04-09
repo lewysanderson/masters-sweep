@@ -42,3 +42,15 @@ export function formatLastUpdated(timestamp: number): string {
   const hours = Math.floor(minutes / 60);
   return `${hours}h ago`;
 }
+
+export function formatTimestamp(timestamp: number): string {
+  const date = new Date(timestamp);
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const day = days[date.getDay()];
+  const dateNum = date.getDate();
+  const month = months[date.getMonth()];
+  const hours = date.getHours().toString().padStart(2, '0');
+  const mins = date.getMinutes().toString().padStart(2, '0');
+  return `${day} ${dateNum} ${month} ${hours}:${mins} GMT`;
+}
