@@ -54,45 +54,40 @@ export default function HomePage() {
   return (
     <MobileShell>
       {/* Header */}
-      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] text-white px-6 pt-12 pb-8">
+      <div className="bg-gradient-to-b from-[var(--masters-green)] via-[var(--masters-green-dark)] to-[var(--masters-cream)] text-white px-6 pt-10 pb-6">
         <div className="text-center">
-          <div className="inline-block px-4 py-1 bg-white/10 rounded-full text-xs font-bold uppercase tracking-widest mb-3 backdrop-blur-sm">
-            Golf Sweep 2026
-          </div>
-          <h1 className="text-4xl font-serif font-bold mb-2 tracking-tight">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Golf Sweep 2026</p>
+          <h1 className="text-3xl font-serif font-bold tracking-tight">
             The Masters
           </h1>
-          <div className="flex items-center justify-center gap-2 text-sm text-white/70">
-            <span>April 9-12</span>
-            <span className="text-white/30">|</span>
-            <span>Augusta National</span>
-          </div>
+          <p className="text-xs text-white/50 mt-1">April 9-12 &middot; Augusta National</p>
 
           {/* Pre-tournament countdown */}
           {isPre && (
-            <div className="mt-6">
+            <div className="mt-5">
               <Countdown targetDate={TOURNAMENT_CONFIG.startDate} />
             </div>
           )}
 
-          {/* Live indicator inside header */}
+          {/* Live indicator */}
           {isLive && scoresData && (
-            <div className="flex items-center justify-center gap-2.5 mt-4">
-              <span className="relative flex h-2 w-2">
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-400"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-400"></span>
               </span>
-              <span className="text-xs font-bold uppercase tracking-widest text-white/90">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-white/80">
                 Round {tournament?.current_round || 1}
               </span>
-              <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Live</span>
-              <span className="text-[10px] text-white/30 ml-1">{formatLastUpdated(scoresData.timestamp)}</span>
+              <span className="text-[10px] text-white/35">
+                {formatLastUpdated(scoresData.timestamp)}
+              </span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="px-5 space-y-5 pb-6">
+      <div className="px-5 space-y-5 pb-6 -mt-2">
 
         {/* Post-tournament banner */}
         {isPost && (
