@@ -5,7 +5,8 @@ import MobileShell from '@/components/MobileShell';
 import { ENTRANTS } from '@/lib/entrants-config';
 import { allGolfers } from '@/lib/dummy-data';
 import { useLiveLeaderboard } from '@/lib/hooks/use-live-scores';
-import { Search, ChevronRight, Trophy } from 'lucide-react';
+import { useFavourites } from '@/lib/hooks/use-favourites';
+import { Search, ChevronRight, Star } from 'lucide-react';
 import Link from 'next/link';
 
 function formatScore(score: number): string {
@@ -15,12 +16,12 @@ function formatScore(score: number): string {
 
 export default function EntrantsPage() {
   const { data: leaderboardData } = useLiveLeaderboard();
+  const { favourites, toggleFavourite, isFavourite, loaded } = useFavourites();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'rank'>('name');
 
   const isPre = !leaderboardData?.tournament || leaderboardData.tournament.status === 'pre';
 
-  // Build a map of entrant ID -> leaderboard entry
   const leaderboardMap = useMemo(() => {
     const map = new Map<string, any>();
     leaderboardData?.leaderboard?.forEach((entry) => {
@@ -29,7 +30,6 @@ export default function EntrantsPage() {
     return map;
   }, [leaderboardData]);
 
-  // Get golfer names for team preview
   const getGolferName = (id: number): string => {
     const g = allGolfers.find((g) => g.id === id);
     return g ? g.name.split(' ').pop() || g.name : '?';
@@ -50,11 +50,17 @@ export default function EntrantsPage() {
         return rankA - rankB;
       });
     } else {
-      list.sort((a, b) => a.name.localeCompare(b.name));
+      // Favourites first, then alphabetical
+      list.sort((a, b) => {
+        const aFav = favourites.includes(a.id) ? 0 : 1;
+        const bFav = favourites.includes(b.id) ? 0 : 1;
+        if (aFav !== bFav) return aFav - bFav;
+        return a.name.localeCompare(b.name);
+      });
     }
     
     return list;
-  }, [search, sortBy, leaderboardMap, isPre]);
+  }, [search, sortBy, leaderboardMap, isPre, favourites]);
 
   return (
     <MobileShell>
@@ -99,20 +105,44 @@ export default function EntrantsPage() {
           )}
         </div>
 
+        {/* Tip if no favourites */}
+        {loaded && favourites.length === 0 && !search && (
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+            <Star size={14} className="text-amber-500 flex-shrink-0" />
+            <p className="text-xs text-amber-800">Tap the star next to your name to pin your team to the home page.</p>
+          </div>
+        )}
+
         {/* Entrant list */}
         <div className="space-y-2 pb-4">
           {filteredEntrants.map((entrant) => {
             const lbEntry = leaderboardMap.get(entrant.id);
             const topPicks = [...entrant.team.top12, ...entrant.team.mid.slice(0, 1)].map(getGolferName);
+            const fav = isFavourite(entrant.id);
             
             return (
-              <Link
+              <div
                 key={entrant.id}
-                href={`/entrants/${entrant.id}`}
                 className={`card card-hover flex items-center gap-3 !p-4 ${
                   lbEntry?.rank === 1 && !isPre ? 'border-2 !border-[var(--masters-gold)]' : ''
-                }`}
+                } ${fav ? '!border-[var(--masters-green)] !border-opacity-40' : ''}`}
               >
+                {/* Favourite star */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavourite(entrant.id);
+                  }}
+                  className="flex-shrink-0 -ml-1 p-1 rounded-full transition-colors"
+                  aria-label={fav ? 'Remove from favourites' : 'Add to favourites'}
+                >
+                  <Star
+                    size={16}
+                    className={fav ? 'text-[var(--masters-gold)] fill-[var(--masters-gold)]' : 'text-stone-300'}
+                  />
+                </button>
+
                 {/* Rank badge */}
                 {!isPre && lbEntry && (
                   <div className={`flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold ${
@@ -126,12 +156,12 @@ export default function EntrantsPage() {
                 )}
 
                 {/* Name and team preview */}
-                <div className="flex-1 min-w-0">
+                <Link href={`/entrants/${entrant.id}`} className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-stone-900 truncate">{entrant.name}</p>
                   <p className="text-xs text-stone-400 mt-0.5 truncate">
                     {topPicks.join(', ')} +{entrant.team.mid.length + entrant.team.wildcard.length - 1} more
                   </p>
-                </div>
+                </Link>
 
                 {/* Score */}
                 {!isPre && lbEntry && (
@@ -145,8 +175,10 @@ export default function EntrantsPage() {
                   </div>
                 )}
 
-                <ChevronRight size={16} className="flex-shrink-0 text-stone-300" />
-              </Link>
+                <Link href={`/entrants/${entrant.id}`} className="flex-shrink-0">
+                  <ChevronRight size={16} className="text-stone-300" />
+                </Link>
+              </div>
             );
           })}
         </div>

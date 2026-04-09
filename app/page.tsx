@@ -4,8 +4,11 @@ import { useLiveScores, useLiveLeaderboard, formatLastUpdated } from '@/lib/hook
 import { TOURNAMENT_CONFIG, getTotalPot, getPrizes, ENTRANTS } from '@/lib/entrants-config';
 import MobileShell from '@/components/MobileShell';
 import Link from 'next/link';
-import { Trophy, Users, Clock, ChevronRight, TrendingUp, Award } from 'lucide-react';
+import { Trophy, Users, Clock, ChevronRight, TrendingUp, Award, Star } from 'lucide-react';
 import { formatDistanceToNow, differenceInDays, differenceInHours, differenceInMinutes } from 'date-fns';
+import { useFavourites } from '@/lib/hooks/use-favourites';
+import { getEntrantById } from '@/lib/entrants-config';
+import { allGolfers } from '@/lib/dummy-data';
 
 function formatScore(score: number): string {
   if (score === 0) return 'E';
@@ -42,6 +45,7 @@ function Countdown({ targetDate }: { targetDate: string }) {
 export default function HomePage() {
   const { data: scoresData, isLoading, isValidating } = useLiveScores();
   const { data: leaderboardData } = useLiveLeaderboard();
+  const { favourites, loaded: favsLoaded } = useFavourites();
   
   const tournament = scoresData?.tournament;
   const isPre = !tournament || tournament.status === 'pre';
@@ -50,6 +54,21 @@ export default function HomePage() {
   
   const prizes = getPrizes();
   const totalPot = getTotalPot();
+
+  // Build favourite entrant data
+  const favouriteEntrants = favourites
+    .map((id) => {
+      const entrant = getEntrantById(id);
+      if (!entrant) return null;
+      const lbEntry = leaderboardData?.leaderboard?.find((e) => e.entrant.id === id);
+      return { entrant, lbEntry };
+    })
+    .filter(Boolean) as Array<{ entrant: NonNullable<ReturnType<typeof getEntrantById>>; lbEntry: any }>;
+
+  const getGolferName = (id: number): string => {
+    const g = allGolfers.find((g) => g.id === id);
+    return g ? g.name.split(' ').pop() || g.name : '?';
+  };
   
   return (
     <MobileShell>
@@ -88,6 +107,95 @@ export default function HomePage() {
       </div>
 
       <div className="px-5 pt-4 space-y-5 pb-6">
+
+        {/* My Team(s) - favourited entrants */}
+        {favsLoaded && favouriteEntrants.length > 0 && (
+          <div>
+            <div className="flex items-center gap-1.5 mb-3">
+              <Star size={14} className="text-[var(--masters-gold)] fill-[var(--masters-gold)]" />
+              <h2 className="text-lg font-serif font-bold text-stone-900">My Team</h2>
+            </div>
+            <div className="space-y-2">
+              {favouriteEntrants.map(({ entrant, lbEntry }) => {
+                const golferNames = [
+                  ...entrant.team.top12,
+                  ...entrant.team.mid,
+                  ...entrant.team.wildcard,
+                ].map(getGolferName);
+
+                // Get live golfer data for score display
+                const golferScores = [
+                  ...entrant.team.top12,
+                  ...entrant.team.mid,
+                  ...entrant.team.wildcard,
+                ].map((gid) => {
+                  const live = scoresData?.golfers?.find((g) => g.id === gid);
+                  const dummy = allGolfers.find((g) => g.id === gid);
+                  return {
+                    name: live?.name || dummy?.name || '?',
+                    shortName: (live?.name || dummy?.name || '?').split(' ').pop() || '?',
+                    score: live?.live_score ?? null,
+                    thru: live?.thru_hole ?? null,
+                    onCourse: live?.on_course || false,
+                    isBestFour: lbEntry?.best_four_golfers?.some((bf: any) => bf.id === gid) || false,
+                    bucket: dummy?.bucket || 'wildcard',
+                  };
+                });
+
+                return (
+                  <Link
+                    key={entrant.id}
+                    href={`/entrants/${entrant.id}`}
+                    className="card card-hover !p-0 overflow-hidden border-[var(--masters-green)]/20"
+                  >
+                    {/* Header bar */}
+                    <div className="flex items-center justify-between px-4 py-3 bg-[var(--masters-green)]/[0.04] border-b border-stone-100">
+                      <div className="flex items-center gap-2">
+                        <Star size={12} className="text-[var(--masters-gold)] fill-[var(--masters-gold)]" />
+                        <p className="font-bold text-sm text-stone-900">{entrant.name}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {lbEntry && !isPre && (
+                          <>
+                            <span className="text-[10px] font-bold text-stone-400">#{lbEntry.rank}</span>
+                            <span className={`text-base font-bold tabular-nums ${
+                              lbEntry.total_score < 0 ? 'text-red-600' :
+                              lbEntry.total_score > 0 ? 'text-blue-600' : 'text-stone-600'
+                            }`}>
+                              {formatScore(lbEntry.total_score)}
+                            </span>
+                          </>
+                        )}
+                        <ChevronRight size={14} className="text-stone-300" />
+                      </div>
+                    </div>
+
+                    {/* Golfer grid */}
+                    <div className="px-4 py-3">
+                      <div className="grid grid-cols-7 gap-1">
+                        {golferScores.map((g, idx) => (
+                          <div key={idx} className={`text-center py-1.5 rounded ${
+                            g.isBestFour && !isPre ? 'bg-emerald-50' : 'bg-stone-50'
+                          }`}>
+                            <p className="text-[9px] font-semibold text-stone-500 truncate px-0.5">{g.shortName}</p>
+                            <p className={`text-xs font-bold tabular-nums mt-0.5 ${
+                              isPre ? 'text-stone-300' :
+                              g.score === null ? 'text-stone-300' :
+                              g.score < 0 ? 'text-red-600' :
+                              g.score > 0 ? 'text-blue-600' : 'text-stone-500'
+                            }`}>
+                              {isPre ? '-' : g.score === null ? '-' : g.score === 0 ? 'E' : g.score > 0 ? `+${g.score}` : g.score}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Post-tournament banner */}
         {isPost && (

@@ -4,10 +4,11 @@ import MobileShell from '@/components/MobileShell';
 import { getEntrantById, ENTRANTS } from '@/lib/entrants-config';
 import { useLiveScores, useLiveLeaderboard } from '@/lib/hooks/use-live-scores';
 import { allGolfers } from '@/lib/dummy-data';
-import { ArrowLeft, Trophy, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Trophy, Circle, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import Link from 'next/link';
 import { Golfer, GolferBucket } from '@/types/database';
 import { useState } from 'react';
+import { useFavourites } from '@/lib/hooks/use-favourites';
 
 function formatScore(score: number | null): string {
   if (score === null) return '-';
@@ -143,6 +144,7 @@ function GolferCard({ golfer, isBestFour, isPre, currentRound }: {
 export default function EntrantDetailPage({ params }: { params: { id: string } }) {
   const { data: scoresData, isLoading: scoresLoading } = useLiveScores();
   const { data: leaderboardData, isLoading: leaderboardLoading } = useLiveLeaderboard();
+  const { isFavourite, toggleFavourite } = useFavourites();
   
   const entrant = getEntrantById(params.id);
   
@@ -199,7 +201,22 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
           <ArrowLeft size={12} />
           Entrants
         </Link>
-        <h1 className="text-xl font-serif font-bold text-white">{entrant.name}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-serif font-bold text-white">{entrant.name}</h1>
+          <button
+            onClick={() => toggleFavourite(entrant.id)}
+            className="p-1 rounded-full transition-colors"
+            aria-label={isFavourite(entrant.id) ? 'Remove from favourites' : 'Add to favourites'}
+          >
+            <Star
+              size={18}
+              className={isFavourite(entrant.id)
+                ? 'text-[var(--masters-gold)] fill-[var(--masters-gold)]'
+                : 'text-white/30 hover:text-white/60'
+              }
+            />
+          </button>
+        </div>
         
         {/* Score summary */}
         {!isPre && leaderboardEntry && (
