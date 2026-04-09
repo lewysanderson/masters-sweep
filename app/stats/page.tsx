@@ -103,15 +103,12 @@ export default function StatsPage() {
   return (
     <MobileShell>
       {/* Header */}
-      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-6 mb-4">
-        <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
-          Pick Analysis
-        </div>
-        <h1 className="text-3xl font-serif font-bold text-white">Statistics</h1>
-        <p className="text-white/60 text-sm mt-1">How popular was each pick?</p>
+      <div className="bg-[var(--masters-green)] px-6 pt-10 pb-4 border-b border-[var(--masters-gold)]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Pick Analysis</p>
+        <h1 className="text-xl font-serif font-bold text-white">Statistics</h1>
       </div>
 
-      <div className="px-5 space-y-4 pb-6">
+      <div className="px-5 pt-4 space-y-4 pb-6">
         {/* Key metrics */}
         <div className="grid grid-cols-3 gap-3">
           <div className="card !p-3 text-center">

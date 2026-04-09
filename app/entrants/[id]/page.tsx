@@ -194,38 +194,34 @@ export default function EntrantDetailPage({ params }: { params: { id: string } }
   return (
     <MobileShell>
       {/* Header */}
-      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-5 pt-14 pb-6">
-        <Link href="/entrants" className="text-white/70 text-xs font-semibold flex items-center gap-1.5 mb-4 hover:text-white uppercase tracking-wider">
-          <ArrowLeft size={14} />
+      <div className="bg-[var(--masters-green)] px-5 pt-10 pb-4 border-b border-[var(--masters-gold)]">
+        <Link href="/entrants" className="text-white/50 text-[10px] font-bold flex items-center gap-1 mb-2 hover:text-white/80 uppercase tracking-[0.15em] transition-colors">
+          <ArrowLeft size={12} />
           Entrants
         </Link>
-        <h1 className="text-2xl font-serif font-bold text-white">{entrant.name}</h1>
+        <h1 className="text-xl font-serif font-bold text-white">{entrant.name}</h1>
         
         {/* Score summary */}
         {!isPre && leaderboardEntry && (
-          <div className="flex items-center gap-6 mt-3">
+          <div className="flex items-center gap-5 mt-2">
             <div className="flex items-center gap-2 text-white/90">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/15 text-sm font-bold">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-white/15 text-xs font-bold">
                 {leaderboardEntry.rank <= 3 ? (
-                  <Trophy size={14} className="text-[var(--masters-gold)]" />
+                  <Trophy size={12} className="text-[var(--masters-gold)]" />
                 ) : (
                   leaderboardEntry.rank
                 )}
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-white/50">Position</p>
-                <p className="text-base font-bold">#{leaderboardEntry.rank}</p>
+                <p className="text-[9px] uppercase tracking-wider text-white/40">Pos</p>
+                <p className="text-sm font-bold">#{leaderboardEntry.rank}</p>
               </div>
             </div>
             <div className="text-white/90">
-              <p className="text-[10px] uppercase tracking-wider text-white/50">Best 4 Score</p>
-              <p className="text-xl font-bold tabular-nums">{formatScore(leaderboardEntry.total_score)}</p>
+              <p className="text-[9px] uppercase tracking-wider text-white/40">Best 4</p>
+              <p className="text-lg font-bold tabular-nums">{formatScore(leaderboardEntry.total_score)}</p>
             </div>
           </div>
-        )}
-        
-        {isPre && (
-          <p className="text-white/50 text-sm mt-2">Tournament has not started yet</p>
         )}
       </div>
 

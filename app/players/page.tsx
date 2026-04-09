@@ -66,27 +66,22 @@ export default function PlayersPage() {
 
   return (
     <MobileShell>
-      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-6 mb-4">
+      <div className="bg-[var(--masters-green)] px-6 pt-10 pb-4 border-b border-[var(--masters-gold)]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
+          {data ? `${data.golfers.length} Competitors` : 'Tournament Field'}
+        </p>
         <div className="flex items-center justify-between">
-          <div>
-            <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
-              Tournament Field
-            </div>
-            <h1 className="text-3xl font-serif font-bold text-white">Players</h1>
-            <p className="text-white/60 text-sm mt-1">
-              {data ? `${data.golfers.length} competitors` : 'Loading...'}
-            </p>
-          </div>
+          <h1 className="text-xl font-serif font-bold text-white">Players</h1>
           {data?.timestamp && !isPre && (
-            <div className="text-right">
-              <p className="text-xs text-white/60">{formatLastUpdated(data.timestamp)}</p>
-              {isValidating && <p className="text-xs text-white/80 animate-pulse mt-1">Updating...</p>}
+            <div className="flex items-center gap-2">
+              {isValidating && <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-pulse" />}
+              <p className="text-[10px] text-white/40">{formatLastUpdated(data.timestamp)}</p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="px-5 space-y-3">
+      <div className="px-5 pt-4 space-y-3">
         {/* Search */}
         <div className="relative">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />

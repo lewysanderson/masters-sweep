@@ -59,15 +59,12 @@ export default function EntrantsPage() {
   return (
     <MobileShell>
       {/* Header */}
-      <div className="gold-accent bg-gradient-to-b from-[var(--masters-green)] to-[var(--masters-green-dark)] px-6 pt-14 pb-6 mb-4">
-        <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm text-white/90">
-          {ENTRANTS.length} Entrants
-        </div>
-        <h1 className="text-3xl font-serif font-bold text-white">Entrants</h1>
-        <p className="text-white/60 text-sm mt-1">View team selections and standings</p>
+      <div className="bg-[var(--masters-green)] px-6 pt-10 pb-4 border-b border-[var(--masters-gold)]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">{ENTRANTS.length} Entrants</p>
+        <h1 className="text-xl font-serif font-bold text-white">Entrants</h1>
       </div>
 
-      <div className="px-5 space-y-3">
+      <div className="px-5 pt-4 space-y-3">
         {/* Search */}
         <div className="relative">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
