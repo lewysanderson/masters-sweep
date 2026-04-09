@@ -74,27 +74,25 @@ export default function HomePage() {
               <Countdown targetDate={TOURNAMENT_CONFIG.startDate} />
             </div>
           )}
+
+          {/* Live indicator inside header */}
+          {isLive && scoresData && (
+            <div className="flex items-center justify-center gap-2.5 mt-4">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-400"></span>
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-white/90">
+                Round {tournament?.current_round || 1}
+              </span>
+              <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Live</span>
+              <span className="text-[10px] text-white/30 ml-1">{formatLastUpdated(scoresData.timestamp)}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="px-5 space-y-5 pb-6 -mt-4">
-
-        {/* Live banner */}
-        {isLive && scoresData && (
-          <div className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-stone-900 border border-stone-700">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-              <span className="text-xs font-bold uppercase tracking-widest text-white">
-                Round {tournament?.current_round || 1}
-              </span>
-              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">Live</span>
-            </div>
-            <span className="text-[10px] text-stone-500">{formatLastUpdated(scoresData.timestamp)}</span>
-          </div>
-        )}
+      <div className="px-5 space-y-5 pb-6">
 
         {/* Post-tournament banner */}
         {isPost && (
