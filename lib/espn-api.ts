@@ -3,6 +3,7 @@ import { Golfer, GolferBucket, GolferStatus, TournamentInfo } from '@/types/data
 const ESPN_BASE_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga';
 const MASTERS_EVENT_ID = '401811941';
 
+// ESPN response types (loosely typed due to varying API responses)
 export interface ESPNCompetitor {
   id: string;
   order: number;
@@ -12,12 +13,20 @@ export interface ESPNCompetitor {
     flag?: { alt: string };
   };
   score: string;  // "E", "-5", "+3"
-  linescores?: Array<{ value?: number }>;
+  linescores?: Array<{
+    period?: number;
+    value?: number;
+    displayValue?: string;
+    linescores?: Array<{
+      period?: number;
+      value?: number;
+    }>;
+  }>;
   status?: {
-    thru?: string;     // "18", "F", "*", "11"
+    thru?: string;
     position?: number;
     type?: string;
-  };
+  } | null;
 }
 
 export interface ESPNResponse {
@@ -46,7 +55,7 @@ export async function fetchMastersTournament(): Promise<ESPNResponse> {
   try {
     const url = `${ESPN_BASE_URL}/scoreboard`;
     const response = await fetch(url, {
-      next: { revalidate: 60 }, // Next.js cache for 60s
+      next: { revalidate: 60 },
     });
     
     if (!response.ok) {
@@ -64,24 +73,59 @@ export async function fetchMastersTournament(): Promise<ESPNResponse> {
 export function parseScoreToNumber(scoreStr: string): number | null {
   if (!scoreStr || scoreStr === '-') return null;
   if (scoreStr === 'E') return 0;
-  return parseInt(scoreStr.replace('+', ''), 10);
+  const num = parseInt(scoreStr.replace('+', ''), 10);
+  return isNaN(num) ? null : num;
 }
 
-export function mapESPNToGolfer(competitor: ESPNCompetitor, bucket: GolferBucket): Golfer {
+export function mapESPNToGolfer(competitor: ESPNCompetitor, bucket: GolferBucket, currentRound?: number): Golfer {
   const score = parseScoreToNumber(competitor.score);
-  const thru = competitor.status?.thru;
-  const roundScores = competitor.linescores?.map((ls) => ls.value || 0) || [];
+  const rounds = competitor.linescores || [];
+  const round = currentRound || 1;
   
-  // Determine thru_hole
+  // Extract round-by-round scores from displayValue
+  const roundScores: number[] = [];
+  rounds.forEach((r) => {
+    if (r.displayValue) {
+      const parsed = parseScoreToNumber(r.displayValue);
+      roundScores.push(parsed ?? 0);
+    }
+  });
+  
+  // Determine thru-hole from hole-by-hole data in current round
   let thruHole: number | null = null;
-  if (thru === 'F') {
-    thruHole = 18;
-  } else if (thru && thru !== '*' && thru !== '-') {
-    thruHole = parseInt(thru, 10);
+  const currentRoundData = rounds[round - 1];
+  if (currentRoundData?.linescores && currentRoundData.linescores.length > 0) {
+    thruHole = currentRoundData.linescores.length;
+  } else if (round > 1) {
+    // If current round has no holes but previous rounds exist, check if they finished previous round
+    const prevRound = rounds[round - 2];
+    if (prevRound?.linescores && prevRound.linescores.length === 18) {
+      thruHole = 0; // Finished previous round, hasn't started current
+    }
   }
   
-  // Determine on_course status
-  const onCourse = thru !== 'F' && thru !== undefined && thru !== null && thru !== '-';
+  // For completed rounds, check if all previous rounds show 18 holes
+  // If the current round index has no data but player has a score, they may not have started
+  const completedHoles = thruHole || 0;
+  const onCourse = completedHoles > 0 && completedHoles < 18;
+  const finishedRound = completedHoles === 18;
+  
+  // Today's score (current round's displayValue)
+  let todayScore: number | null = null;
+  if (currentRoundData?.displayValue) {
+    todayScore = parseScoreToNumber(currentRoundData.displayValue);
+  }
+  
+  // Determine status
+  const statusType = competitor.status?.type?.toLowerCase();
+  let status: GolferStatus = 'active';
+  if (statusType === 'cut' || statusType?.includes('cut')) {
+    status = 'cut';
+  } else if (statusType === 'wd' || statusType?.includes('withdraw')) {
+    status = 'withdrawn';
+  } else if (finishedRound) {
+    status = 'active'; // Still active, just finished today's round
+  }
   
   return {
     id: parseInt(competitor.id, 10),
@@ -91,24 +135,13 @@ export function mapESPNToGolfer(competitor: ESPNCompetitor, bucket: GolferBucket
     bucket,
     live_score: score,
     thru_hole: thruHole,
-    today_score: roundScores.length > 0 ? roundScores[roundScores.length - 1] : null,
+    today_score: todayScore,
     round_scores: roundScores,
-    position: competitor.status?.position,
-    status: determineStatus(competitor, score),
+    position: competitor.status?.position || competitor.order,
+    status,
     on_course: onCourse,
     country: competitor.athlete.flag?.alt,
   };
-}
-
-function determineStatus(competitor: ESPNCompetitor, score: number | null): GolferStatus {
-  const statusType = competitor.status?.type?.toLowerCase();
-  const thru = competitor.status?.thru;
-  
-  if (statusType === 'cut' || statusType?.includes('cut')) return 'cut';
-  if (statusType === 'wd' || statusType?.includes('withdraw')) return 'withdrawn';
-  if (thru === 'F' && score !== null) return 'completed';
-  
-  return 'active';
 }
 
 export function getTournamentInfo(data: ESPNResponse): TournamentInfo | null {

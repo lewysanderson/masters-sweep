@@ -35,7 +35,7 @@ function GolferCard({ golfer, isBestFour, isPre, currentRound }: {
   currentRound: number;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const hasRoundScores = golfer.round_scores && golfer.round_scores.length > 0 && golfer.round_scores.some(s => s !== 0);
+  const hasRoundScores = golfer.round_scores && golfer.round_scores.length > 0;
   const isCut = golfer.status === 'cut';
   const isWD = golfer.status === 'withdrawn';
   const effectiveScore = isCut ? (golfer.live_score ?? 0) * 2 : (golfer.live_score ?? 0);
@@ -114,7 +114,7 @@ function GolferCard({ golfer, isBestFour, isPre, currentRound }: {
                 <div key={idx} className="flex-1 text-center bg-stone-50 rounded py-1.5">
                   <p className="text-[10px] font-bold text-stone-400 uppercase">R{idx + 1}</p>
                   <p className={`text-sm font-bold tabular-nums ${score === 0 ? 'text-stone-500' : score < 0 ? 'text-red-600' : 'text-blue-600'}`}>
-                    {score === 0 ? '-' : score > 0 ? `+${score}` : score}
+                    {score === 0 ? 'E' : score > 0 ? `+${score}` : score}
                   </p>
                 </div>
               ))}

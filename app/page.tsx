@@ -81,19 +81,18 @@ export default function HomePage() {
 
         {/* Live banner */}
         {isLive && scoresData && (
-          <div className="flex items-center justify-between bg-gradient-to-r from-red-600 to-red-700 text-white px-5 py-3.5 rounded-xl shadow-premium">
-            <div className="flex items-center gap-3">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-stone-900 border border-stone-700">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
-              <span className="font-bold uppercase tracking-wider text-sm">
-                Round {tournament?.current_round || 1} - Live
+              <span className="text-xs font-bold uppercase tracking-widest text-white">
+                Round {tournament?.current_round || 1}
               </span>
+              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">Live</span>
             </div>
-            <div className="text-right">
-              <span className="text-xs opacity-80">{formatLastUpdated(scoresData.timestamp)}</span>
-            </div>
+            <span className="text-[10px] text-stone-500">{formatLastUpdated(scoresData.timestamp)}</span>
           </div>
         )}
 

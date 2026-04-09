@@ -46,7 +46,8 @@ export async function GET(request: Request) {
       }
       
       if (comp) {
-        const mapped = mapESPNToGolfer(comp, dummyGolfer.bucket);
+        const currentRound = tournamentInfo?.current_round || 1;
+        const mapped = mapESPNToGolfer(comp, dummyGolfer.bucket, currentRound);
         // CRITICAL: Override ID with our dummy ID so entrant team lookups work
         return {
           ...mapped,

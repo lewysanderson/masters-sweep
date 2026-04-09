@@ -126,11 +126,10 @@ export default function PlayersPage() {
         <div className="space-y-1.5 pb-4">
           {/* Table header */}
           <div className="flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
-            <span className="w-7 text-right">#</span>
             <span className="flex-1">Player</span>
             <span className="w-10 text-center">Picks</span>
             {!isPre && <span className="w-12 text-right">Score</span>}
-            {!isPre && <span className="w-14 text-right">Status</span>}
+            {!isPre && <span className="w-16 text-right">Thru</span>}
           </div>
 
           {golfers.map((golfer) => {
@@ -142,7 +141,7 @@ export default function PlayersPage() {
             if (!isPre) {
               if (isCut) statusText = 'CUT';
               else if (golfer.thru_hole === 18) statusText = 'F';
-              else if (golfer.thru_hole !== null) statusText = `${golfer.thru_hole}`;
+              else if (golfer.thru_hole !== null && golfer.thru_hole > 0) statusText = `${golfer.thru_hole}`;
               else statusText = '-';
             }
 
@@ -150,9 +149,6 @@ export default function PlayersPage() {
               <div key={golfer.id} className={`flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white border border-stone-100 ${
                 isCut ? 'opacity-50' : ''
               }`}>
-                {/* Rank */}
-                <span className="w-7 text-right text-xs font-mono text-stone-400">{golfer.world_rank}</span>
-
                 {/* Name & Bucket */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
@@ -189,7 +185,7 @@ export default function PlayersPage() {
 
                 {/* Status */}
                 {!isPre && (
-                  <div className="w-14 text-right">
+                  <div className="w-16 text-right">
                     <span className={`text-xs ${isCut ? 'font-bold text-red-500' : 'text-stone-400'}`}>
                       {statusText}
                     </span>

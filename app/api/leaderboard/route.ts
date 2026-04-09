@@ -40,7 +40,8 @@ export async function GET(request: Request) {
       }
       
       if (comp) {
-        const mapped = mapESPNToGolfer(comp, dummyGolfer.bucket);
+        const currentRound = tournamentInfo?.current_round || 1;
+        const mapped = mapESPNToGolfer(comp, dummyGolfer.bucket, currentRound);
         golferMap.set(dummyGolfer.id, { ...mapped, id: dummyGolfer.id, bucket: dummyGolfer.bucket });
       } else {
         // Pre-tournament fallback - no live score
