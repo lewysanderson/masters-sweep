@@ -5,28 +5,34 @@ import { ENTRANTS } from '@/lib/entrants-config';
 import { allGolfers } from '@/lib/dummy-data';
 import { LeaderboardEntry, Golfer, TournamentInfo } from '@/types/database';
 
+// Normalize name: strip diacritics and lowercase
+function normalizeName(name: string): string {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 export async function GET(request: Request) {
   try {
     const data = await scoreCache.getData();
     const tournamentInfo = getTournamentInfo(data);
     
-    // Build a name -> ESPN competitor map
+    // Build a normalized name -> ESPN competitor map
     const competitors = data.events[0]?.competitions[0]?.competitors || [];
     const espnByName = new Map<string, any>();
     competitors.forEach((comp) => {
-      espnByName.set(comp.athlete.displayName.toLowerCase(), comp);
+      espnByName.set(normalizeName(comp.athlete.displayName), comp);
     });
     
     // Build a map from our dummy ID -> Golfer with live data
     const golferMap = new Map<number, Golfer>();
     allGolfers.forEach((dummyGolfer) => {
-      const nameLower = dummyGolfer.name.toLowerCase();
-      let comp = espnByName.get(nameLower);
+      const nameNorm = normalizeName(dummyGolfer.name);
+      let comp = espnByName.get(nameNorm);
       
       if (!comp) {
-        const lastName = dummyGolfer.name.split(' ').pop()?.toLowerCase() || '';
+        const lastName = normalizeName(dummyGolfer.name.split(' ').pop() || '');
+        const firstName = normalizeName(dummyGolfer.name.split(' ')[0]);
         for (const [espnName, espnComp] of espnByName) {
-          if (espnName.endsWith(lastName) && espnName.includes(dummyGolfer.name.split(' ')[0].toLowerCase())) {
+          if (espnName.endsWith(lastName) && espnName.includes(firstName)) {
             comp = espnComp;
             break;
           }

@@ -4,6 +4,11 @@ import { mapESPNToGolfer, getTournamentInfo } from '@/lib/espn-api';
 import { allGolfers } from '@/lib/dummy-data';
 import { Golfer } from '@/types/database';
 
+// Normalize name: strip diacritics and lowercase
+function normalizeName(name: string): string {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 export async function GET(request: Request) {
   try {
     const data = await scoreCache.getData();
@@ -16,24 +21,24 @@ export async function GET(request: Request) {
       );
     }
     
-    // Build a name -> ESPN competitor map
+    // Build a normalized name -> ESPN competitor map
     const competitors = data.events[0]?.competitions[0]?.competitors || [];
     const espnByName = new Map<string, any>();
     competitors.forEach((comp) => {
-      espnByName.set(comp.athlete.displayName.toLowerCase(), comp);
+      espnByName.set(normalizeName(comp.athlete.displayName), comp);
     });
     
     // Map our golfers to include ESPN live data, keyed by OUR dummy IDs
     const updatedGolfers: Golfer[] = allGolfers.map((dummyGolfer) => {
-      // Try exact match first, then partial
-      const nameLower = dummyGolfer.name.toLowerCase();
-      let comp = espnByName.get(nameLower);
+      const nameNorm = normalizeName(dummyGolfer.name);
+      let comp = espnByName.get(nameNorm);
       
       if (!comp) {
-        // Try last name matching
-        const lastName = dummyGolfer.name.split(' ').pop()?.toLowerCase() || '';
+        // Try last name matching with normalized names
+        const lastName = normalizeName(dummyGolfer.name.split(' ').pop() || '');
+        const firstName = normalizeName(dummyGolfer.name.split(' ')[0]);
         for (const [espnName, espnComp] of espnByName) {
-          if (espnName.endsWith(lastName) && espnName.includes(dummyGolfer.name.split(' ')[0].toLowerCase())) {
+          if (espnName.endsWith(lastName) && espnName.includes(firstName)) {
             comp = espnComp;
             break;
           }

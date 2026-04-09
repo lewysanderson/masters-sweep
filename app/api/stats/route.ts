@@ -5,6 +5,11 @@ import { ENTRANTS } from '@/lib/entrants-config';
 import { allGolfers } from '@/lib/dummy-data';
 import { GolferStats } from '@/types/database';
 
+// Normalize name: strip diacritics and lowercase
+function normalizeName(name: string): string {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 export async function GET(request: Request) {
   try {
     const data = await scoreCache.getData();
@@ -14,11 +19,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
     }
     
-    // Build name -> ESPN map
+    // Build normalized name -> ESPN map
     const competitors = data.events[0]?.competitions[0]?.competitors || [];
     const espnByName = new Map<string, any>();
     competitors.forEach((comp) => {
-      espnByName.set(comp.athlete.displayName.toLowerCase(), comp);
+      espnByName.set(normalizeName(comp.athlete.displayName), comp);
     });
     
     // Calculate pick statistics
@@ -38,8 +43,8 @@ export async function GET(request: Request) {
       if (pickCount === 0) return;
       
       // Try to get live score
-      const nameLower = golfer.name.toLowerCase();
-      const comp = espnByName.get(nameLower);
+      const nameNorm = normalizeName(golfer.name);
+      const comp = espnByName.get(nameNorm);
       const liveScore = comp ? 
         (comp.score === 'E' ? 0 : parseInt(comp.score?.replace('+', '') || '0', 10)) : 
         null;
