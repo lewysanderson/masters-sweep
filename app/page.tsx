@@ -54,13 +54,13 @@ export default function HomePage() {
   return (
     <MobileShell>
       {/* Header */}
-      <div className="bg-gradient-to-b from-[var(--masters-green)] via-[var(--masters-green-dark)] to-[var(--masters-cream)] text-white px-6 pt-10 pb-6">
+      <div className="bg-[var(--masters-green)] text-white px-6 pt-10 pb-5 border-b border-[var(--masters-gold)]">
         <div className="text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Golf Sweep 2026</p>
-          <h1 className="text-3xl font-serif font-bold tracking-tight">
+          <h1 className="text-2xl font-serif font-bold tracking-tight">
             The Masters
           </h1>
-          <p className="text-xs text-white/50 mt-1">April 9-12 &middot; Augusta National</p>
+          <p className="text-[11px] text-white/50 mt-0.5">April 9-12 &middot; Augusta National</p>
 
           {/* Pre-tournament countdown */}
           {isPre && (
@@ -87,7 +87,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="px-5 space-y-5 pb-6 -mt-2">
+      <div className="px-5 pt-4 space-y-5 pb-6">
 
         {/* Post-tournament banner */}
         {isPost && (
