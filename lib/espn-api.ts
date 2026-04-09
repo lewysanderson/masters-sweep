@@ -55,7 +55,7 @@ export async function fetchMastersTournament(): Promise<ESPNResponse> {
   try {
     const url = `${ESPN_BASE_URL}/scoreboard`;
     const response = await fetch(url, {
-      next: { revalidate: 60 },
+      cache: 'no-store', // Always fetch fresh - caching handled by ScoreCache singleton
     });
     
     if (!response.ok) {

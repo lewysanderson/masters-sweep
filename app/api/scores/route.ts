@@ -77,8 +77,8 @@ export async function GET(request: Request) {
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
-          'CDN-Cache-Control': 'max-age=60',
+          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=15',
+          'CDN-Cache-Control': 'max-age=30',
         },
       }
     );

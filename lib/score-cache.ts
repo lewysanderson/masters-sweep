@@ -3,7 +3,7 @@ import { fetchMastersTournament, ESPNResponse } from './espn-api';
 class ScoreCache {
   private data: ESPNResponse | null = null;
   private lastFetch: number = 0;
-  private readonly TTL = 60000; // 60 seconds
+  private readonly TTL = 30000; // 30 seconds
   private isFetching = false;
   private fetchPromise: Promise<ESPNResponse> | null = null;
 

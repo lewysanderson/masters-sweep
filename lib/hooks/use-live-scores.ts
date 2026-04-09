@@ -18,18 +18,18 @@ export interface LeaderboardData {
 
 export function useLiveScores() {
   return useSWR<ScoresData>('/api/scores', fetcher, {
-    refreshInterval: 60000,
+    refreshInterval: 30000,
     dedupingInterval: 2000,
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
     revalidateOnReconnect: true,
   });
 }
 
 export function useLiveLeaderboard() {
   return useSWR<LeaderboardData>('/api/leaderboard', fetcher, {
-    refreshInterval: 60000,
+    refreshInterval: 30000,
     dedupingInterval: 2000,
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
     revalidateOnReconnect: true,
   });
 }
