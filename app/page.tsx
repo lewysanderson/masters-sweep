@@ -1,10 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useLiveScores, useLiveLeaderboard, formatLastUpdated, formatTimestamp } from '@/lib/hooks/use-live-scores';
 import { TOURNAMENT_CONFIG, getTotalPot, getPrizes, ENTRANTS } from '@/lib/entrants-config';
 import MobileShell from '@/components/MobileShell';
 import Link from 'next/link';
-import { Trophy, Users, Clock, ChevronRight, TrendingUp, Award, Star } from 'lucide-react';
+import { Trophy, Users, Clock, ChevronRight, TrendingUp, Award, Star, BookOpen, X } from 'lucide-react';
 import { formatDistanceToNow, differenceInDays, differenceInHours, differenceInMinutes } from 'date-fns';
 import { useFavourites } from '@/lib/hooks/use-favourites';
 import { getEntrantById } from '@/lib/entrants-config';
@@ -55,7 +56,9 @@ export default function HomePage() {
   const prizes = getPrizes();
   const totalPot = getTotalPot();
 
-  // Build favourite entrant data
+  const [showRules, setShowRules] = useState(false);
+
+  // Build favourite entrant data, sorted by score (best first)
   const favouriteEntrants = favourites
     .map((id) => {
       const entrant = getEntrantById(id);
@@ -64,6 +67,16 @@ export default function HomePage() {
       return { entrant, lbEntry };
     })
     .filter(Boolean) as Array<{ entrant: NonNullable<ReturnType<typeof getEntrantById>>; lbEntry: any }>;
+
+  // Sort favourites: lowest score (best) first, then by rank
+  favouriteEntrants.sort((a, b) => {
+    const scoreA = a.lbEntry?.total_score ?? 999;
+    const scoreB = b.lbEntry?.total_score ?? 999;
+    if (scoreA !== scoreB) return scoreA - scoreB;
+    const rankA = a.lbEntry?.rank ?? 999;
+    const rankB = b.lbEntry?.rank ?? 999;
+    return rankA - rankB;
+  });
 
   const getGolferName = (id: number): string => {
     const g = allGolfers.find((g) => g.id === id);
@@ -327,19 +340,128 @@ export default function HomePage() {
         )}
 
         {/* Quick links */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/entrants" className="card card-hover !p-4 text-center">
-            <Users size={20} className="mx-auto mb-2 text-[var(--masters-green)]" />
-            <p className="text-sm font-bold text-stone-700">Find My Team</p>
-            <p className="text-xs text-stone-400 mt-0.5">View all selections</p>
+        <div className="grid grid-cols-3 gap-3">
+          <Link href="/entrants" className="card card-hover !p-3 text-center">
+            <Users size={18} className="mx-auto mb-1.5 text-[var(--masters-green)]" />
+            <p className="text-xs font-bold text-stone-700">Find My Team</p>
           </Link>
-          <Link href="/stats" className="card card-hover !p-4 text-center">
-            <TrendingUp size={20} className="mx-auto mb-2 text-[var(--masters-green)]" />
-            <p className="text-sm font-bold text-stone-700">Pick Analysis</p>
-            <p className="text-xs text-stone-400 mt-0.5">See popular picks</p>
+          <Link href="/stats" className="card card-hover !p-3 text-center">
+            <TrendingUp size={18} className="mx-auto mb-1.5 text-[var(--masters-green)]" />
+            <p className="text-xs font-bold text-stone-700">Pick Analysis</p>
           </Link>
+          <button onClick={() => setShowRules(true)} className="card card-hover !p-3 text-center">
+            <BookOpen size={18} className="mx-auto mb-1.5 text-[var(--masters-green)]" />
+            <p className="text-xs font-bold text-stone-700">Rules</p>
+          </button>
         </div>
       </div>
+
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setShowRules(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-[512px] max-h-[85vh] bg-white rounded-t-2xl overflow-hidden shadow-2xl animate-slideUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3.5 bg-white border-b border-stone-200">
+              <h2 className="text-base font-serif font-bold text-stone-900">Rules</h2>
+              <button onClick={() => setShowRules(false)} className="p-1 rounded-full hover:bg-stone-100 transition-colors">
+                <X size={18} className="text-stone-400" />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="overflow-y-auto px-5 py-4 space-y-4" style={{ maxHeight: 'calc(85vh - 52px)' }}>
+              {/* Team Selection */}
+              <div>
+                <h3 className="text-xs font-bold text-[var(--masters-green)] uppercase tracking-wider mb-2">Team Selection</h3>
+                <p className="text-sm text-stone-600 mb-2">Each entrant picks <strong>7 golfers</strong> from three tiers:</p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2.5 p-2.5 bg-amber-50 rounded-lg">
+                    <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-bold text-white">2</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-amber-800">Top 12</p>
+                      <p className="text-[11px] text-amber-600">World ranked 1-12</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 p-2.5 bg-blue-50 rounded-lg">
+                    <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-bold text-white">3</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-blue-800">Mid Tier</p>
+                      <p className="text-[11px] text-blue-600">World ranked 13-50</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 p-2.5 bg-purple-50 rounded-lg">
+                    <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-bold text-white">2</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-purple-800">Wildcard</p>
+                      <p className="text-[11px] text-purple-600">World ranked 51+</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scoring */}
+              <div>
+                <h3 className="text-xs font-bold text-[var(--masters-green)] uppercase tracking-wider mb-2">Scoring</h3>
+                <ul className="space-y-1.5 text-sm text-stone-700">
+                  <li className="flex gap-2">
+                    <span className="text-[var(--masters-gold)] font-bold">1.</span>
+                    Your <strong>best 4 scores</strong> out of 7 golfers count
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[var(--masters-gold)] font-bold">2.</span>
+                    Scores are cumulative over all 4 rounds (total to par)
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[var(--masters-gold)] font-bold">3.</span>
+                    Missed cut = score <strong>doubled</strong> as penalty
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[var(--masters-gold)] font-bold">4.</span>
+                    <strong>Lowest combined score wins</strong>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Example */}
+              <div className="bg-stone-50 rounded-lg p-3.5">
+                <h3 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Example</h3>
+                <p className="text-sm text-stone-600">7 golfers finish: <strong>-8, -5, -3, -1, +2, +4, CUT(+6)</strong></p>
+                <p className="text-xs text-stone-400 mt-1">Best 4: -8, -5, -3, -1</p>
+                <p className="text-sm font-bold text-[var(--masters-green)] mt-1">Total = -17</p>
+              </div>
+
+              {/* Prizes */}
+              <div>
+                <h3 className="text-xs font-bold text-[var(--masters-green)] uppercase tracking-wider mb-2">Prizes</h3>
+                <div className="space-y-2">
+                  {[
+                    { pos: '1st Place (70%)', amount: prizes.first, color: 'bg-[var(--masters-gold)]' },
+                    { pos: '2nd Place (20%)', amount: prizes.second, color: 'bg-stone-400' },
+                    { pos: '3rd Place (10%)', amount: prizes.third, color: 'bg-amber-700' },
+                  ].map(({ pos, amount, color }) => (
+                    <div key={pos} className="flex items-center gap-2.5">
+                      <div className={`w-3 h-3 rounded-full ${color} flex-shrink-0`} />
+                      <span className="flex-1 text-sm text-stone-700">{pos}</span>
+                      <span className="text-sm font-bold text-stone-900">&pound;{amount}</span>
+                    </div>
+                  ))}
+                  <p className="text-xs text-stone-400 mt-1">{ENTRANTS.length} entrants &times; &pound;{TOURNAMENT_CONFIG.entry_fee} = &pound;{totalPot} pool</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </MobileShell>
   );
 }
