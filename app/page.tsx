@@ -151,14 +151,19 @@ export default function HomePage() {
                 ].map((gid) => {
                   const live = scoresData?.golfers?.find((g) => g.id === gid);
                   const dummy = allGolfers.find((g) => g.id === gid);
+                  const isCut = live?.status === 'cut';
+                  const rawScore = live?.live_score ?? null;
+                  const effectiveScore = isCut ? (rawScore ?? 0) * 2 : rawScore;
                   return {
                     name: live?.name || dummy?.name || '?',
                     shortName: (live?.name || dummy?.name || '?').split(' ').pop() || '?',
-                    score: live?.live_score ?? null,
+                    score: rawScore,
+                    effectiveScore,
                     thru: live?.thru_hole ?? null,
                     onCourse: live?.on_course || false,
                     isBestFour: lbEntry?.best_four_golfers?.some((bf: any) => bf.id === gid) || false,
                     bucket: dummy?.bucket || 'wildcard',
+                    isCut,
                   };
                 });
 
@@ -195,17 +200,27 @@ export default function HomePage() {
                       <div className="grid grid-cols-7 gap-1">
                         {golferScores.map((g, idx) => (
                           <div key={idx} className={`text-center py-1.5 rounded ${
+                            g.isCut && !isPre ? 'bg-red-50 opacity-60' :
                             g.isBestFour && !isPre ? 'bg-emerald-50' : 'bg-stone-50'
                           }`}>
-                            <p className="text-[9px] font-semibold text-stone-500 truncate px-0.5">{g.shortName}</p>
-                            <p className={`text-xs font-bold tabular-nums mt-0.5 ${
-                              isPre ? 'text-stone-300' :
-                              g.score === null ? 'text-stone-300' :
-                              g.score < 0 ? 'text-red-600' :
-                              g.score > 0 ? 'text-blue-600' : 'text-stone-500'
-                            }`}>
-                              {isPre ? '-' : g.score === null ? '-' : g.score === 0 ? 'E' : g.score > 0 ? `+${g.score}` : g.score}
-                            </p>
+                            <p className={`text-[9px] font-semibold truncate px-0.5 ${g.isCut && !isPre ? 'line-through text-stone-400' : 'text-stone-500'}`}>{g.shortName}</p>
+                            {g.isCut && !isPre ? (
+                              <div>
+                                <p className="text-xs font-bold tabular-nums mt-0.5 text-red-500">
+                                  {g.effectiveScore === 0 ? 'E' : g.effectiveScore !== null ? (g.effectiveScore > 0 ? `+${g.effectiveScore}` : g.effectiveScore) : '-'}
+                                </p>
+                                <p className="text-[7px] font-bold text-red-400">CUT</p>
+                              </div>
+                            ) : (
+                              <p className={`text-xs font-bold tabular-nums mt-0.5 ${
+                                isPre ? 'text-stone-300' :
+                                g.score === null ? 'text-stone-300' :
+                                g.score < 0 ? 'text-red-600' :
+                                g.score > 0 ? 'text-blue-600' : 'text-stone-500'
+                              }`}>
+                                {isPre ? '-' : g.score === null ? '-' : g.score === 0 ? 'E' : g.score > 0 ? `+${g.score}` : g.score}
+                              </p>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -315,7 +330,7 @@ export default function HomePage() {
             </div>
             <div className="card !p-0 overflow-hidden divide-y divide-stone-100">
               {[...scoresData.golfers]
-                .filter(g => g.live_score !== null)
+                .filter(g => g.live_score !== null && g.status !== 'cut')
                 .sort((a, b) => (a.live_score ?? 0) - (b.live_score ?? 0))
                 .slice(0, 5)
                 .map((golfer, idx) => (

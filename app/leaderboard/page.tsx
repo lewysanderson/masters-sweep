@@ -69,28 +69,36 @@ function EntryRow({ entry, expanded, onToggle, isPre }: {
                 isBestFour: entry.best_four_golfers.some(bf => bf.id === g.id),
               }))
               .sort((a, b) => a.effective - b.effective)
-              .map(({ golfer, effective, isBestFour }) => (
-                <div key={golfer.id} className={`flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[11px] ${
-                  isBestFour ? 'bg-emerald-50/80' : 'opacity-35'
-                }`}>
-                  <span className={`text-[7px] font-bold px-1 py-0.5 rounded ${
-                    golfer.bucket === 'top12' ? 'bg-amber-100 text-amber-700' :
-                    golfer.bucket === 'mid' ? 'bg-blue-100 text-blue-700' :
-                    'bg-purple-100 text-purple-700'
-                  }`}>
-                    {golfer.bucket === 'top12' ? 'T12' : golfer.bucket === 'mid' ? 'MID' : 'WC'}
-                  </span>
-                  <span className="flex-1 truncate">{golfer.name}</span>
-                  {golfer.status === 'cut' && <AlertTriangle size={9} className="text-amber-500 flex-shrink-0" />}
-                  {!isPre && (
-                    <span className={`font-bold tabular-nums flex-shrink-0 ${
-                      effective < 0 ? 'text-red-600' : effective > 0 ? 'text-blue-600' : 'text-stone-400'
+              .map(({ golfer, effective, isBestFour }) => {
+                const isCut = golfer.status === 'cut';
+                return (
+                  <div key={golfer.id} className={`flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[11px] ${
+                    isBestFour ? 'bg-emerald-50/80' : 'opacity-35'
+                  } ${isCut ? '!opacity-60' : ''}`}>
+                    <span className={`text-[7px] font-bold px-1 py-0.5 rounded ${
+                      golfer.bucket === 'top12' ? 'bg-amber-100 text-amber-700' :
+                      golfer.bucket === 'mid' ? 'bg-blue-100 text-blue-700' :
+                      'bg-purple-100 text-purple-700'
                     }`}>
-                      {formatScore(effective)}
+                      {golfer.bucket === 'top12' ? 'T12' : golfer.bucket === 'mid' ? 'MID' : 'WC'}
                     </span>
-                  )}
-                </div>
-              ))}
+                    <span className={`flex-1 truncate ${isCut ? 'line-through text-stone-400' : ''}`}>{golfer.name}</span>
+                    {isCut && (
+                      <span className="flex-shrink-0 text-[7px] font-bold bg-red-100 text-red-600 px-1 py-0.5 rounded">
+                        CUT &times;2
+                      </span>
+                    )}
+                    {!isPre && (
+                      <span className={`font-bold tabular-nums flex-shrink-0 ${
+                        isCut ? 'text-red-500' :
+                        effective < 0 ? 'text-red-600' : effective > 0 ? 'text-blue-600' : 'text-stone-400'
+                      }`}>
+                        {formatScore(effective)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}

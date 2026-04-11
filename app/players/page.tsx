@@ -130,6 +130,7 @@ export default function PlayersPage() {
             const bucket = bucketStyles[golfer.bucket];
             const picks = pickCounts.get(golfer.id) || 0;
             const isCut = golfer.status === 'cut';
+            const effectiveScore = isCut ? (golfer.live_score ?? 0) * 2 : (golfer.live_score ?? 0);
 
             let statusText = '';
             if (!isPre) {
@@ -140,8 +141,8 @@ export default function PlayersPage() {
             }
 
             return (
-              <div key={golfer.id} className={`flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white border border-stone-100 ${
-                isCut ? 'opacity-50' : ''
+              <div key={golfer.id} className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border ${
+                isCut ? 'bg-red-50/50 border-red-200/60 opacity-60' : 'bg-white border-stone-100'
               }`}>
                 {/* Name & Bucket */}
                 <div className="flex-1 min-w-0">
@@ -152,10 +153,22 @@ export default function PlayersPage() {
                     <p className={`font-semibold text-sm truncate ${isCut ? 'line-through text-stone-400' : ''}`}>
                       {golfer.name}
                     </p>
+                    {isCut && !isPre && (
+                      <span className="flex-shrink-0 text-[8px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded">
+                        MISSED CUT
+                      </span>
+                    )}
                   </div>
-                  <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${bucket.bg} ${bucket.text}`}>
-                    {bucket.label}
-                  </span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${bucket.bg} ${bucket.text}`}>
+                      {bucket.label}
+                    </span>
+                    {isCut && !isPre && (
+                      <span className="text-[9px] text-red-500 font-medium">
+                        Score doubled: {formatScore(golfer.live_score)} &rarr; {formatScore(effectiveScore)}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Pick count */}
@@ -167,13 +180,22 @@ export default function PlayersPage() {
 
                 {/* Score */}
                 {!isPre && (
-                  <div className="w-12 text-right">
-                    <span className={`text-sm font-bold tabular-nums ${
-                      (golfer.live_score ?? 0) < 0 ? 'text-red-600' :
-                      (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-500'
-                    }`}>
-                      {formatScore(golfer.live_score)}
-                    </span>
+                  <div className="w-14 text-right">
+                    {isCut ? (
+                      <div>
+                        <span className="text-sm font-bold tabular-nums text-red-600">
+                          {formatScore(effectiveScore)}
+                        </span>
+                        <p className="text-[9px] text-stone-400 line-through tabular-nums">{formatScore(golfer.live_score)}</p>
+                      </div>
+                    ) : (
+                      <span className={`text-sm font-bold tabular-nums ${
+                        (golfer.live_score ?? 0) < 0 ? 'text-red-600' :
+                        (golfer.live_score ?? 0) > 0 ? 'text-blue-600' : 'text-stone-500'
+                      }`}>
+                        {formatScore(golfer.live_score)}
+                      </span>
+                    )}
                   </div>
                 )}
 

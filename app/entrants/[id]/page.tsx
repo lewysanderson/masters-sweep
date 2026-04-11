@@ -4,7 +4,7 @@ import MobileShell from '@/components/MobileShell';
 import { getEntrantById, ENTRANTS } from '@/lib/entrants-config';
 import { useLiveScores, useLiveLeaderboard } from '@/lib/hooks/use-live-scores';
 import { allGolfers } from '@/lib/dummy-data';
-import { ArrowLeft, Trophy, Circle, ChevronDown, ChevronUp, Star } from 'lucide-react';
+import { ArrowLeft, Trophy, Circle, ChevronDown, ChevronUp, Star, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { Golfer, GolferBucket } from '@/types/database';
 import { useState } from 'react';
@@ -61,8 +61,9 @@ function GolferCard({ golfer, isBestFour, isPre, currentRound }: {
 
   return (
     <div className={`rounded-lg border transition-all ${
+      isCut ? 'border-red-200 bg-red-50/30' :
       isBestFour ? 'border-emerald-300 bg-emerald-50/50 shadow-sm' : 'border-stone-200 bg-white'
-    } ${isCut || isWD ? 'opacity-60' : ''}`}>
+    } ${isCut || isWD ? 'opacity-70' : ''}`}>
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full px-4 py-3 flex items-center gap-3"
@@ -80,9 +81,14 @@ function GolferCard({ golfer, isBestFour, isPre, currentRound }: {
             <p className={`font-semibold text-sm truncate ${isCut || isWD ? 'line-through text-stone-400' : ''}`}>
               {golfer.name}
             </p>
-            {isBestFour && (
+            {isBestFour && !isCut && (
               <span className="flex-shrink-0 text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">
                 BEST 4
+              </span>
+            )}
+            {isCut && !isPre && (
+              <span className="flex-shrink-0 text-[8px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded">
+                MISSED CUT
               </span>
             )}
           </div>
@@ -91,11 +97,19 @@ function GolferCard({ golfer, isBestFour, isPre, currentRound }: {
 
         {/* Score */}
         <div className="text-right flex-shrink-0">
-          <p className={`text-lg font-bold tabular-nums ${isPre ? 'text-stone-300' : scoreColor(golfer.live_score)}`}>
-            {isPre ? '-' : formatScore(golfer.live_score)}
-          </p>
-          {isCut && !isPre && (
-            <p className="text-[10px] text-stone-400 font-medium">({formatScore(effectiveScore)} eff.)</p>
+          {isCut && !isPre ? (
+            <div>
+              <p className="text-lg font-bold tabular-nums text-red-600">
+                {formatScore(effectiveScore)}
+              </p>
+              <p className="text-[10px] text-stone-400 font-medium tabular-nums">
+                <span className="line-through">{formatScore(golfer.live_score)}</span> &times;2
+              </p>
+            </div>
+          ) : (
+            <p className={`text-lg font-bold tabular-nums ${isPre ? 'text-stone-300' : scoreColor(golfer.live_score)}`}>
+              {isPre ? '-' : formatScore(golfer.live_score)}
+            </p>
           )}
         </div>
 
@@ -104,6 +118,16 @@ function GolferCard({ golfer, isBestFour, isPre, currentRound }: {
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>
       </button>
+
+      {/* Cut penalty banner */}
+      {isCut && !isPre && (
+        <div className="mx-4 mb-2 px-3 py-1.5 bg-red-100 rounded-md flex items-center gap-2">
+          <AlertTriangle size={12} className="text-red-500 flex-shrink-0" />
+          <p className="text-[10px] font-semibold text-red-700">
+            Score doubled: {formatScore(golfer.live_score)} &rarr; {formatScore(effectiveScore)}
+          </p>
+        </div>
+      )}
 
       {/* Expanded detail */}
       {expanded && (
