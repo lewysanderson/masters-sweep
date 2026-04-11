@@ -83,9 +83,10 @@ export function mapESPNToGolfer(competitor: ESPNCompetitor, bucket: GolferBucket
   const round = currentRound || 1;
   
   // Extract round-by-round scores from displayValue
+  // Skip sentinel entries (value=0, displayValue="-") which ESPN uses for cut golfers
   const roundScores: number[] = [];
   rounds.forEach((r) => {
-    if (r.displayValue) {
+    if (r.displayValue && r.displayValue !== '-') {
       const parsed = parseScoreToNumber(r.displayValue);
       roundScores.push(parsed ?? 0);
     }
@@ -117,12 +118,30 @@ export function mapESPNToGolfer(competitor: ESPNCompetitor, bucket: GolferBucket
   }
   
   // Determine status
+  // ESPN does NOT provide an explicit "cut" status field. Instead, cut must be
+  // inferred from the linescores structure:
+  // - Made cut: 4 linescores (Round 4 placeholder present)
+  // - Missed cut: fewer linescores, last entry is a sentinel (value=0, displayValue="-")
   const statusType = competitor.status?.type?.toLowerCase();
   let status: GolferStatus = 'active';
   if (statusType === 'cut' || statusType?.includes('cut')) {
     status = 'cut';
   } else if (statusType === 'wd' || statusType?.includes('withdraw')) {
     status = 'withdrawn';
+  } else if (round >= 3 && rounds.length > 0) {
+    // After round 2 is complete, detect cut from linescores structure
+    // Cut golfers have fewer linescores and their last entry is a zeroed-out sentinel
+    const lastRound = rounds[rounds.length - 1];
+    const isSentinel = lastRound && 
+      lastRound.value !== undefined && 
+      lastRound.value === 0 && 
+      (lastRound.displayValue === '-' || lastRound.displayValue === undefined);
+    
+    // If tournament is in round 3+ but golfer only has entries up to round 2
+    // (the sentinel round 3 entry doesn't count as a real round)
+    if (isSentinel && rounds.length < 4) {
+      status = 'cut';
+    }
   } else if (finishedRound) {
     status = 'active'; // Still active, just finished today's round
   }
