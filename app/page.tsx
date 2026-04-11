@@ -373,10 +373,10 @@ export default function HomePage() {
 
       {/* Rules Modal */}
       {showRules && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setShowRules(false)}>
+        <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={() => setShowRules(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-[512px] max-h-[90vh] bg-white rounded-t-2xl overflow-hidden shadow-2xl animate-slideUp"
+            className="relative w-full max-w-[512px] max-h-[85vh] bg-white rounded-t-2xl overflow-hidden shadow-2xl animate-slideUp mb-[calc(4rem+env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
@@ -388,7 +388,7 @@ export default function HomePage() {
             </div>
 
             {/* Modal body */}
-            <div className="overflow-y-auto px-5 py-4 pb-8 space-y-4" style={{ maxHeight: 'calc(90vh - 52px)' }}>
+            <div className="overflow-y-auto px-5 py-4 pb-6 space-y-4" style={{ maxHeight: 'calc(85vh - 4rem - 52px)' }}>
               {/* Team Selection */}
               <div>
                 <h3 className="text-xs font-bold text-[var(--masters-green)] uppercase tracking-wider mb-2">Team Selection</h3>
