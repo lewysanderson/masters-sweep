@@ -88,7 +88,7 @@ export default function HomePage() {
       {/* Header */}
       <div className="bg-[var(--masters-green)] text-white px-6 pt-10 pb-5 border-b border-[var(--masters-gold)]">
         <div className="text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Golf Sweep 2026</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">The RLB Sweep 2026</p>
           <h1 className="text-2xl font-serif font-bold tracking-tight">
             The Masters
           </h1>
@@ -376,7 +376,7 @@ export default function HomePage() {
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setShowRules(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-[512px] max-h-[85vh] bg-white rounded-t-2xl overflow-hidden shadow-2xl animate-slideUp"
+            className="relative w-full max-w-[512px] max-h-[90vh] bg-white rounded-t-2xl overflow-hidden shadow-2xl animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
@@ -388,7 +388,7 @@ export default function HomePage() {
             </div>
 
             {/* Modal body */}
-            <div className="overflow-y-auto px-5 py-4 space-y-4" style={{ maxHeight: 'calc(85vh - 52px)' }}>
+            <div className="overflow-y-auto px-5 py-4 pb-8 space-y-4" style={{ maxHeight: 'calc(90vh - 52px)' }}>
               {/* Team Selection */}
               <div>
                 <h3 className="text-xs font-bold text-[var(--masters-green)] uppercase tracking-wider mb-2">Team Selection</h3>

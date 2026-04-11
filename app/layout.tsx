@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'The Masters 2026 - Golf Sweep',
+  title: 'The Masters 2026 - The RLB Sweep',
   description: 'A tradition unlike any other. Follow your picks for The Masters 2026.',
 };
 
